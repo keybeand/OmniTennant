@@ -42,7 +42,7 @@ US18         Merchant Storefront Configuration & Webhook Endpoints
 
 All V1 stories guarantee strong tenant data segregation at the persistence tier through `tenant_id` query scoping, atomic inventory decrement using pessimistic or distributed Redis locks, and idempotency key enforcement on all checkout requests.
 
-Detailed specifications are maintained in the **INVEST Requirements Catalog**.
+Detailed specifications are maintained in the [INVEST Requirements Catalog](docs/08-invest-requirements.md).
 
 ### 1.3 Use Cases
 
@@ -93,7 +93,7 @@ flowchart TB
     style system fill:#f7fafc,stroke:#2b6cb0,stroke-dasharray:5 5
 ```
 
-Detailed preconditions, happy paths, edge cases, and postconditions are documented in the **Use Case Specifications**.
+Detailed preconditions, happy paths, edge cases, and postconditions are documented in the [Use Case Specifications](docs/03-use-cases.md).
 
 ### 1.4 Roles and Permissions
 
