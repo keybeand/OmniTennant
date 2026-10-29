@@ -9,7 +9,8 @@ Requirements define the operational scope, actor responsibilities, transactional
 
 ### 1.1 Product Mind Map
 
-![OmniTenant mind map](docs/mindmap.png)
+<img width="2816" height="1504" alt="omnitenant_mindmap" src="https://github.com/user-attachments/assets/0d148ffb-71c4-4981-a54a-0c722ace2d0a" />
+
 
 ### 1.2 INVEST Requirements
 
