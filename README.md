@@ -116,7 +116,13 @@ The Information Architecture maps out the structural layout of both the Backoffi
 
 ### 2.1 Information Architecture
 
-The following diagram illustrates the hierarchy of the OmniTenant platform, including the Tenant Admin Backoffice and the Customer Storefront.
+The following sitemap illustrates the visual information architecture, page hierarchy, and block-level section composition across the OmniTenant storefront:
+
+![OmniTenant Storefront Information Architecture](docs/images/sitemap.png)
+
+### 2.2 Screen Hierarchy
+
+The following diagram illustrates the architectural hierarchy of the OmniTenant platform, including the Tenant Admin Backoffice and the Customer Storefront.
 
 ```mermaid
 flowchart TD
@@ -155,3 +161,160 @@ flowchart TD
     classDef container fill:#ffffff,stroke:#1168bd,stroke-width:2px,color:#000,text-align:left
     class DashboardPage,CatalogPage,InventoryPage,OrdersPage,CatalogBrowse,CheckoutFlow container
 ```
+
+Detailed screen IDs, task flows, permissions, UI/UX state contracts, and API mappings are maintained in [Information Architecture & Screen Hierarchy](docs/04-information-architecture.md).
+
+## 3. C4 Architecture
+
+This section documents the C1–C3 architecture views of the OmniTenant platform.
+
+### C1 — System Context
+
+```mermaid
+flowchart LR
+    superAdmin(["Platform SuperAdmin"])
+    tenantAdmin(["Tenant Owner"])
+    inventoryMgr(["Warehouse Operator"])
+    b2bBuyer(["B2B Buyer"])
+    b2cCustomer(["B2C Shopper"])
+
+    subgraph boundary[" "]
+        omni["OmniTenant Platform<br/><i>[Software System]</i><br/>Multi-tenant B2B/B2C commerce &<br/>omnichannel inventory synchronization"]
+    end
+
+    extWms[("External WMS / ERP<br/><i>[External System]</i>")]
+    payment[("Payment Gateway<br/><i>[External System]</i>")]
+
+    superAdmin -- "provisions tenants & audits" --> omni
+    tenantAdmin -- "manages pricing & storefront" --> omni
+    inventoryMgr -- "allocates channel inventory" --> omni
+    b2bBuyer -- "places volume bulk orders" --> omni
+    b2cCustomer -- "concurrent 15m hold checkout" --> omni
+
+    omni -- "authorizes charges" --> payment
+    extWms -.->|"pushes stock deltas via HMAC"| omni
+
+    style omni fill:#1168bd,color:#fff
+```
+
+### C2 — Container
+
+```mermaid
+flowchart TB
+    admin(["Tenant Staff / Admins"])
+    shopper(["B2B / B2C Customers"])
+
+    subgraph platform["OmniTenant System Boundary"]
+        direction TB
+        subgraph presentation["Presentation"]
+            storefront["Customer Storefront<br/><i>[React 19 + Vite]</i><br/>Catalog, cart, 15m hold checkout, CSV bulk upload"]
+            backoffice["Admin Backoffice<br/><i>[React 19 + Vite]</i><br/>Catalog, channel inventory hub, conflict queue"]
+        end
+        subgraph application["Application"]
+            gateway["API Gateway & Reverse Proxy<br/><i>[Nginx / YARP]</i><br/>Tenant domain resolution, SSL, rate-limits"]
+            backend["OmniTenant Backend API<br/><i>[ASP.NET Core 9.0 Web API]</i><br/>Clean Architecture, CQRS, Two-Phase reservation, RLS"]
+        end
+        subgraph data["Persistence & Cache"]
+            redis[("Redis Cache & Lock<br/><i>[Redis 7.2]</i><br/>Redlock distributed locks, 15-min holds, idempotency")]
+            database[("PostgreSQL Database<br/><i>[PostgreSQL 16]</i><br/>Row-Level Security (tenant_id), ACID catalog & orders")]
+        end
+    end
+
+    shopper --> storefront
+    admin --> backoffice
+    storefront -- "REST / HTTPS / JSON" --> gateway
+    backoffice -- "REST / HTTPS / JSON" --> gateway
+    gateway -- "injects X-Tenant-ID" --> backend
+    backend -- "Redlock & holds" --> redis
+    backend -- "SQL with RLS session" --> database
+
+    style storefront fill:#1168bd,color:#fff
+    style backoffice fill:#1168bd,color:#fff
+    style backend fill:#1168bd,color:#fff
+    style redis fill:#1a365d,color:#fff
+    style database fill:#1a365d,color:#fff
+```
+
+### C3 — Component
+
+```mermaid
+flowchart TB
+    subgraph rt["OmniTenant Backend API [Container]"]
+        direction TB
+        api["HTTP API & Controllers<br/><i>[ASP.NET Core]</i><br/>REST endpoints, Tenant middleware, Idempotency filter"]
+        auth["Identity & Context<br/><i>[Component]</i><br/>Stateless JWT, Tenant context binding, RBAC"]
+        catalog["Catalog & Pricing<br/><i>[Component]</i><br/>Products, SKU variants, Tiered Volume Pricing engine"]
+        inventory["Omnichannel Inventory<br/><i>[Component]</i><br/>Two-Phase reservation, Redlock, WMS webhook reconciliation"]
+        orders["Commerce & Checkout<br/><i>[Component]</i><br/>Two-phase checkout commit, B2B credit terms, PDF invoices"]
+        persistence["Persistence Layer<br/><i>[Component: EF Core]</i><br/>Tenant RLS interceptor, transactional boundaries"]
+    end
+
+    web["Web Frontends"]
+    pg[("PostgreSQL 16")]
+    rd[("Redis 7.2")]
+
+    web --> api
+    api --> auth
+    api --> catalog
+    api --> inventory
+    api --> orders
+
+    catalog --> persistence
+    inventory --> persistence
+    inventory --> rd
+    orders --> persistence
+    orders --> rd
+    persistence --> pg
+
+    style api fill:#1168bd,color:#fff
+    style auth fill:#1168bd,color:#fff
+    style catalog fill:#1168bd,color:#fff
+    style inventory fill:#0b4f9e,color:#fff
+    style orders fill:#0b4f9e,color:#fff
+    style persistence fill:#1168bd,color:#fff
+```
+
+Complete architecture documentation: [C4 Architecture Handbook](docs/architecture/c4/README.md).
+
+## 4. Database Diagrams and OpenAPI 3.0 Contract
+
+### 4.1 Database Diagrams & PostgreSQL Schema
+
+The OmniTenant PostgreSQL model enforces strict multi-tenancy via Row-Level Security (`tenant_id`), two-phase concurrency holds (`inventory_reservations` with 15-minute TTL), B2B volume breaks, and an append-only audit trail.
+
+```mermaid
+erDiagram
+    tenants ||--o{ app_users : "employs"
+    tenants ||--o{ products : "sells"
+    tenants ||--o{ skus : "catalogs"
+    tenants ||--o{ price_tiers : "configures"
+    tenants ||--o{ inventory_channel_allocations : "allocates"
+    tenants ||--o{ orders : "fulfills"
+
+    products ||--o{ skus : "has variants"
+    skus ||--o{ inventory_channel_allocations : "allocated across"
+    skus ||--o{ inventory_reservations : "held (TTL 15m)"
+    orders ||--o{ order_items : "contains"
+    skus ||--o{ order_items : "purchased as"
+
+    price_tiers ||--o{ tier_volume_rules : "defines breaks"
+    skus ||--o{ tier_volume_rules : "discounted by"
+```
+
+See the [detailed entity-relationship diagram](docs/DATABASE.md), [data model specification](docs/05-data-model.md), and [PostgreSQL schema DDL](src/database/schema.sql).
+
+### 4.2 OpenAPI 3.0 API Documentation
+
+The HTTP contract is defined with OpenAPI 3.0.3 and organized into Authentication & Tenants, Catalog & SKUs, Wholesale Pricing, Omnichannel Inventory, Checkout & Orders, B2B Bulk Orders, Staff & RBAC, and Analytics & Audit.
+
+```text
+25 paths
+36 reusable schemas
+Stateless Bearer JWT security (15-min TTL) with tenant context resolution
+Strict Idempotency-Key enforcement on mutating checkout & webhook requests
+Two-phase stock reservation protocol (Redis Redlock + 15-min hold)
+RFC 7807-compatible application/problem+json errors with traceId correlation
+```
+
+- [OpenAPI 3.0.3 specification](docs/api/openapi.yaml)
+- [API documentation and sample cURL workflows](docs/api/README.md)

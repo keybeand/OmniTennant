@@ -1,0 +1,2575 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "OmniTenant Commerce & Inventory API",
+    "description": "Cloud-native Multi-Tenant B2B/B2C Commerce and Omnichannel Inventory Synchronization Platform.\nEnforces Row-Level Tenant Isolation, Two-Phase Stock Reservation with Redis Distributed Locks,\nIdempotent Checkout, and Tiered Volume Pricing.\n",
+    "version": "1.0.0",
+    "contact": {
+      "name": "OmniTenant Architecture Team",
+      "url": "https://github.com/keybeand/OmniTennant"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1",
+      "description": "Local ASP.NET Core Development Server"
+    },
+    {
+      "url": "http://api.omnitenant.local/api/v1",
+      "description": "Docker Compose Environment"
+    },
+    {
+      "url": "https://{tenant-slug}.omnitenant.com/api/v1",
+      "description": "Multi-Tenant Ingress Subdomain",
+      "variables": {
+        "tenant-slug": {
+          "default": "demo-store",
+          "description": "Target tenant organization slug"
+        }
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "Authentication & Tenants",
+      "description": "Platform & Tenant Sign-In, Context Switching, Tenant Provisioning (UC01, UC02, UC05)"
+    },
+    {
+      "name": "Catalog & SKUs",
+      "description": "Product Catalog, Variant Generation, and Faceted Search (UC10, UC15)"
+    },
+    {
+      "name": "Wholesale Pricing",
+      "description": "B2B Tiered Volume Pricing and Price Lists (UC09)"
+    },
+    {
+      "name": "Omnichannel Inventory",
+      "description": "Multi-Channel Stock Allocation, Safety Stock Buffers, WMS Webhooks, Conflict Resolution (UC11, UC12, UC13, UC14)"
+    },
+    {
+      "name": "Checkout & Orders",
+      "description": "Two-Phase Stock Reservation, Idempotent Checkout, Order Management, PDF Invoices (UC16, UC17)"
+    },
+    {
+      "name": "B2B Bulk Orders",
+      "description": "CSV/Excel Bulk Order Upload, Validation Grid, Batch Commitment (UC18)"
+    },
+    {
+      "name": "Staff & RBAC",
+      "description": "Tenant Staff Directory and Role-Based Permissions (UC06)"
+    },
+    {
+      "name": "Analytics & Audit",
+      "description": "Real-time Sales KPIs, Stock Health, and Immutable Compliance Audit Trail (UC04, UC08)"
+    }
+  ],
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication & Tenants"
+        ],
+        "summary": "Universal User Sign-In (UC01, UC05)",
+        "description": "Authenticates platform superadmins or tenant staff/shoppers. Returns signed Bearer JWT.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Authentication successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/ProblemUnauthorized"
+          }
+        }
+      }
+    },
+    "/auth/switch-tenant": {
+      "post": {
+        "tags": [
+          "Authentication & Tenants"
+        ],
+        "summary": "Switch Tenant Organization Context (UC05)",
+        "description": "Exchanges a multi-tenant user's session token for a JWT scoped to the specified tenant ID.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchTenantRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tenant context switched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/ProblemForbidden"
+          }
+        }
+      }
+    },
+    "/tenants": {
+      "post": {
+        "tags": [
+          "Authentication & Tenants"
+        ],
+        "summary": "Provision New Tenant Organization (UC02)",
+        "description": "Platform SuperAdmin provisioning of an isolated tenant environment, database schema, and initial Owner.",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantProvisionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tenant provisioned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "$ref": "#/components/responses/ProblemConflict"
+          }
+        }
+      }
+    },
+    "/tenants/settings": {
+      "get": {
+        "tags": [
+          "Authentication & Tenants"
+        ],
+        "summary": "Get Tenant Storefront & Branding Settings (UC07)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Settings retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantSettingsDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Authentication & Tenants"
+        ],
+        "summary": "Update Tenant Storefront & Webhook Configuration (UC07)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TenantSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Settings updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantSettingsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/storefront/catalog": {
+      "get": {
+        "tags": [
+          "Catalog & SKUs"
+        ],
+        "summary": "Public Storefront Catalog Browse with Facets (UC15)",
+        "description": "Retrieves published catalog items with faceted attribute filtering and dynamic pricing.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "inStockOnly",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/StorefrontProductSummaryDto"
+                      }
+                    },
+                    "facets": {
+                      "$ref": "#/components/schemas/FacetFilterResultDto"
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": [
+          "Catalog & SKUs"
+        ],
+        "summary": "Backoffice Catalog Grid (UC10)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "PUBLISHED",
+                "ARCHIVED"
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProductDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalog & SKUs"
+        ],
+        "summary": "Create Product Master (UC10)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Product created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/products/{id}/skus": {
+      "get": {
+        "tags": [
+          "Catalog & SKUs"
+        ],
+        "summary": "List SKU Variants for Product (UC10)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SKU variants list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SkuDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalog & SKUs"
+        ],
+        "summary": "Create SKU Variant Unit (UC10)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SkuCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "SKU variant created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SkuDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pricing/tiers": {
+      "get": {
+        "tags": [
+          "Wholesale Pricing"
+        ],
+        "summary": "List B2B Price Tiers (UC09)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of price tiers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PriceTierDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Wholesale Pricing"
+        ],
+        "summary": "Create Wholesale Price Tier with Volume Breaks (UC09)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PriceTierCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Price tier created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PriceTierDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pricing/evaluate": {
+      "post": {
+        "tags": [
+          "Wholesale Pricing"
+        ],
+        "summary": "Evaluate Dynamic Line-Item Pricing (UC15)",
+        "description": "Computes unit prices based on order quantity and customer group volume tier breaks.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DynamicPriceEvaluationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Price evaluated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DynamicPriceEvaluationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/allocations": {
+      "get": {
+        "tags": [
+          "Omnichannel Inventory"
+        ],
+        "summary": "Get Multi-Channel Inventory Allocation Matrix (UC12)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skuCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Channel allocations retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChannelAllocationDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Omnichannel Inventory"
+        ],
+        "summary": "Update Channel Inventory Allocation Quotas (UC12)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelAllocationUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Allocations updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChannelAllocationDto"
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Sum of allocations exceeds physical stock",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/skus/{skuCode}/safety-stock": {
+      "put": {
+        "tags": [
+          "Omnichannel Inventory"
+        ],
+        "summary": "Set SKU Safety Stock Threshold Buffer (UC11)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "skuCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SafetyStockUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Safety stock updated"
+          }
+        }
+      }
+    },
+    "/inventory/conflicts": {
+      "get": {
+        "tags": [
+          "Omnichannel Inventory"
+        ],
+        "summary": "List Inventory Sync Conflicts Queue (UC14)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of discrepancies",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SyncConflictDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inventory/conflicts/{id}/resolve": {
+      "post": {
+        "tags": [
+          "Omnichannel Inventory"
+        ],
+        "summary": "Resolve Sync Conflict & Balance Ledger (UC14)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveConflictRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Conflict resolved successfully"
+          }
+        }
+      }
+    },
+    "/webhooks/inventory": {
+      "post": {
+        "tags": [
+          "Omnichannel Inventory"
+        ],
+        "summary": "Ingest External WMS Inventory Webhook Delta (UC13)",
+        "description": "Ingests real-time physical inventory delta. Secured by HMAC SHA-256 and Idempotency-Key.",
+        "security": [
+          {
+            "WebhookSignature": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "X-OmniTenant-Timestamp",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InventoryWebhookPayload"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Inventory delta ingested and channels rebalanced"
+          },
+          "401": {
+            "description": "Invalid HMAC signature",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkout/reserve": {
+      "post": {
+        "tags": [
+          "Checkout & Orders"
+        ],
+        "summary": "Phase 1: High-Concurrency Stock Reservation Hold (UC16)",
+        "description": "Acquires Redis Redlock and decrements available channel stock. Creates temporary hold with 15-minute TTL.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StockReservationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock reserved successfully. 15-minute TTL hold active.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StockReservationResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Insufficient stock. Zero overselling guarantee.",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/checkout/confirm": {
+      "post": {
+        "tags": [
+          "Checkout & Orders"
+        ],
+        "summary": "Phase 2: Idempotent Order Confirmation & Payment (UC16)",
+        "description": "Commits the 15-minute hold into a final confirmed order. Mandates Idempotency-Key.",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-Tenant-ID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckoutConfirmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order confirmed and committed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Idempotency conflict or expired reservation hold",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "tags": [
+          "Checkout & Orders"
+        ],
+        "summary": "List Orders (UC17)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/OrderDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}": {
+      "get": {
+        "tags": [
+          "Checkout & Orders"
+        ],
+        "summary": "Get Order Detail (UC17)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{id}/invoice.pdf": {
+      "get": {
+        "tags": [
+          "Checkout & Orders"
+        ],
+        "summary": "Download PDF Tax Invoice (UC17)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Official PDF invoice",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/b2b/bulk-orders/validate": {
+      "post": {
+        "tags": [
+          "B2B Bulk Orders"
+        ],
+        "summary": "Upload & Validate Bulk Order CSV File (UC18)",
+        "description": "Validates line-by-line SKU matching, MOQ rules, stock availability, and tier discounts (max 2,000 rows).",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk file validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkOrderValidationResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/b2b/bulk-orders/confirm": {
+      "post": {
+        "tags": [
+          "B2B Bulk Orders"
+        ],
+        "summary": "Confirm Validated Bulk Order Batch (UC18)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkOrderConfirmRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Batch order created and inventory allocated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Staff & RBAC"
+        ],
+        "summary": "Directory of Organization Staff (UC06)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Staff list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/invite": {
+      "post": {
+        "tags": [
+          "Staff & RBAC"
+        ],
+        "summary": "Invite Staff Member with RBAC Role (UC06)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Staff invitation dispatched"
+          }
+        }
+      }
+    },
+    "/analytics/dashboard-kpis": {
+      "get": {
+        "tags": [
+          "Analytics & Audit"
+        ],
+        "summary": "Get Backoffice Real-Time KPIs (UC08)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KPI metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardKpiDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/audit-logs": {
+      "get": {
+        "tags": [
+          "Analytics & Audit"
+        ],
+        "summary": "Filter Immutable Audit Trail (UC04)",
+        "security": [
+          {
+            "BearerAuth": []
+          },
+          {
+            "TenantIdHeader": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "entityType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Audit logs list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AuditLogDto"
+                      }
+                    },
+                    "meta": {
+                      "$ref": "#/components/schemas/PaginationMetaDto"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "15-minute stateless JWT containing user_id, tenant_id, and role claims."
+      },
+      "TenantIdHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-Tenant-ID",
+        "description": "Target organization Tenant UUID."
+      },
+      "WebhookSignature": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-OmniTenant-Signature",
+        "description": "HMAC SHA-256 signature calculated over the request body."
+      }
+    },
+    "responses": {
+      "ProblemUnauthorized": {
+        "description": "Authentication failed or token expired",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            }
+          }
+        }
+      },
+      "ProblemForbidden": {
+        "description": "Role lacks access or cross-tenant boundary breach",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            }
+          }
+        }
+      },
+      "ProblemConflict": {
+        "description": "State conflict, slug collision, or insufficient stock",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetails"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ProblemDetails": {
+        "type": "object",
+        "required": [
+          "type",
+          "title",
+          "status",
+          "errorCode",
+          "traceId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "https://api.omnitenant.com/errors/insufficient-stock"
+          },
+          "title": {
+            "type": "string",
+            "example": "Insufficient Stock"
+          },
+          "status": {
+            "type": "integer",
+            "example": 409
+          },
+          "detail": {
+            "type": "string",
+            "example": "Requested quantity exceeds available channel stock."
+          },
+          "instance": {
+            "type": "string",
+            "example": "/api/v1/checkout/reserve"
+          },
+          "errorCode": {
+            "type": "string",
+            "example": "INSUFFICIENT_STOCK"
+          },
+          "traceId": {
+            "type": "string",
+            "example": "00-4bf92f3577b34da6a3ce929d0e0e4736-00"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "owner@brand.local"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "example": "SecurePassword123!"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "required": [
+          "accessToken",
+          "expiresInSeconds",
+          "user"
+        ],
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "expiresInSeconds": {
+            "type": "integer",
+            "example": 900
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserDto"
+          }
+        }
+      },
+      "SwitchTenantRequest": {
+        "type": "object",
+        "required": [
+          "tenantId"
+        ],
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "TenantProvisionRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "slug",
+          "ownerEmail",
+          "subscriptionTier"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Acme Footwear"
+          },
+          "slug": {
+            "type": "string",
+            "example": "acme-footwear"
+          },
+          "domainCname": {
+            "type": "string",
+            "example": "store.acmefootwear.com"
+          },
+          "ownerEmail": {
+            "type": "string",
+            "format": "email",
+            "example": "admin@acmefootwear.com"
+          },
+          "subscriptionTier": {
+            "type": "string",
+            "enum": [
+              "FREE",
+              "PRO",
+              "ENTERPRISE"
+            ]
+          }
+        }
+      },
+      "TenantDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "subscriptionTier",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "domainCname": {
+            "type": "string"
+          },
+          "subscriptionTier": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "TenantSettingsDto": {
+        "type": "object",
+        "required": [
+          "currency",
+          "brandColor"
+        ],
+        "properties": {
+          "currency": {
+            "type": "string",
+            "example": "USD"
+          },
+          "brandColor": {
+            "type": "string",
+            "example": "#1168bd"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "webhookEndpointUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "ProductDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "slug",
+          "basePrice",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "example": "Classic Cotton T-Shirt"
+          },
+          "slug": {
+            "type": "string",
+            "example": "classic-cotton-tshirt"
+          },
+          "description": {
+            "type": "string"
+          },
+          "basePrice": {
+            "type": "number",
+            "format": "float",
+            "example": 25.0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "PUBLISHED",
+              "ARCHIVED"
+            ]
+          }
+        }
+      },
+      "ProductCreateRequest": {
+        "type": "object",
+        "required": [
+          "title",
+          "slug",
+          "categoryId",
+          "basePrice"
+        ],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "basePrice": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "SkuDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "skuCode",
+          "retailPrice",
+          "isActive"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string",
+            "example": "SKU-TSHIRT-BLK-L"
+          },
+          "barcode": {
+            "type": "string",
+            "example": 8935001234567
+          },
+          "attributes": {
+            "type": "object",
+            "example": {
+              "color": "Black",
+              "size": "L"
+            }
+          },
+          "weightGrams": {
+            "type": "integer",
+            "example": 250
+          },
+          "retailPrice": {
+            "type": "number",
+            "example": 25.0
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SkuCreateRequest": {
+        "type": "object",
+        "required": [
+          "skuCode",
+          "retailPrice"
+        ],
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "barcode": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "object"
+          },
+          "retailPrice": {
+            "type": "number"
+          },
+          "costPrice": {
+            "type": "number"
+          },
+          "weightGrams": {
+            "type": "integer"
+          }
+        }
+      },
+      "StorefrontProductSummaryDto": {
+        "type": "object",
+        "required": [
+          "productId",
+          "title",
+          "slug",
+          "skuCode",
+          "retailPrice",
+          "availableToSell"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "retailPrice": {
+            "type": "number"
+          },
+          "wholesaleTierPrice": {
+            "type": "number"
+          },
+          "availableToSell": {
+            "type": "integer",
+            "example": 45
+          }
+        }
+      },
+      "FacetFilterResultDto": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "colors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "PriceTierDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "currencyCode"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Wholesale Tier 1"
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "USD"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TierVolumeRuleDto"
+            }
+          }
+        }
+      },
+      "PriceTierCreateRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "currencyCode"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "currencyCode": {
+            "type": "string"
+          },
+          "rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TierVolumeRuleDto"
+            }
+          }
+        }
+      },
+      "TierVolumeRuleDto": {
+        "type": "object",
+        "required": [
+          "minQuantity",
+          "discountType",
+          "discountValue"
+        ],
+        "properties": {
+          "minQuantity": {
+            "type": "integer",
+            "example": 50
+          },
+          "maxQuantity": {
+            "type": "integer",
+            "example": 199
+          },
+          "discountType": {
+            "type": "string",
+            "enum": [
+              "PERCENTAGE",
+              "FIXED_PRICE"
+            ]
+          },
+          "unitPrice": {
+            "type": "number",
+            "example": 18.0
+          },
+          "discountValue": {
+            "type": "number",
+            "example": 28.0
+          }
+        }
+      },
+      "DynamicPriceEvaluationRequest": {
+        "type": "object",
+        "required": [
+          "skuCode",
+          "quantity"
+        ],
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "example": 75
+          },
+          "buyerId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "DynamicPriceEvaluationResponse": {
+        "type": "object",
+        "required": [
+          "skuCode",
+          "quantity",
+          "basePrice",
+          "finalUnitPrice",
+          "totalLineAmount"
+        ],
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "basePrice": {
+            "type": "number"
+          },
+          "finalUnitPrice": {
+            "type": "number",
+            "example": 18.0
+          },
+          "totalLineAmount": {
+            "type": "number",
+            "example": 1350.0
+          },
+          "appliedTierName": {
+            "type": "string",
+            "example": "Wholesale Tier 1"
+          }
+        }
+      },
+      "ChannelAllocationDto": {
+        "type": "object",
+        "required": [
+          "skuCode",
+          "channel",
+          "allocatedQuantity",
+          "safetyStockBuffer"
+        ],
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "enum": [
+              "ONLINE_B2C",
+              "WHOLESALE_B2B",
+              "RETAIL_OUTLET"
+            ]
+          },
+          "allocatedQuantity": {
+            "type": "integer",
+            "example": 120
+          },
+          "safetyStockBuffer": {
+            "type": "integer",
+            "example": 15
+          },
+          "availableToSell": {
+            "type": "integer",
+            "example": 105
+          }
+        }
+      },
+      "ChannelAllocationUpdateRequest": {
+        "type": "object",
+        "required": [
+          "skuCode",
+          "allocations"
+        ],
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "channel",
+                "allocatedQuantity"
+              ],
+              "properties": {
+                "channel": {
+                  "type": "string",
+                  "enum": [
+                    "ONLINE_B2C",
+                    "WHOLESALE_B2B",
+                    "RETAIL_OUTLET"
+                  ]
+                },
+                "allocatedQuantity": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "SafetyStockUpdateRequest": {
+        "type": "object",
+        "required": [
+          "safetyStockBuffer"
+        ],
+        "properties": {
+          "safetyStockBuffer": {
+            "type": "integer",
+            "example": 20
+          }
+        }
+      },
+      "SyncConflictDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "skuCode",
+          "warehouseCode",
+          "reportedDelta",
+          "systemBalance",
+          "discrepancy",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skuCode": {
+            "type": "string"
+          },
+          "warehouseCode": {
+            "type": "string"
+          },
+          "reportedDelta": {
+            "type": "integer"
+          },
+          "systemBalance": {
+            "type": "integer"
+          },
+          "discrepancy": {
+            "type": "integer",
+            "example": -5
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "RESOLVED",
+              "IGNORED"
+            ]
+          }
+        }
+      },
+      "ResolveConflictRequest": {
+        "type": "object",
+        "required": [
+          "action",
+          "resolutionNotes"
+        ],
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "ABSORB_INTO_SAFETY_STOCK",
+              "FORCE_SYSTEM_OVERWRITE",
+              "MANUAL_REBALANCE"
+            ]
+          },
+          "resolutionNotes": {
+            "type": "string",
+            "example": "Stock physical shrinkage confirmed during warehouse audit."
+          }
+        }
+      },
+      "InventoryWebhookPayload": {
+        "type": "object",
+        "required": [
+          "warehouseCode",
+          "batchId",
+          "deltas"
+        ],
+        "properties": {
+          "warehouseCode": {
+            "type": "string"
+          },
+          "batchId": {
+            "type": "string"
+          },
+          "deltas": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "skuCode",
+                "physicalDelta"
+              ],
+              "properties": {
+                "skuCode": {
+                  "type": "string"
+                },
+                "physicalDelta": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "StockReservationRequest": {
+        "type": "object",
+        "required": [
+          "channel",
+          "cartId",
+          "items"
+        ],
+        "properties": {
+          "channel": {
+            "type": "string",
+            "enum": [
+              "ONLINE_B2C",
+              "WHOLESALE_B2B"
+            ]
+          },
+          "cartId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "skuCode",
+                "quantity"
+              ],
+              "properties": {
+                "skuCode": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer",
+                  "example": 2
+                }
+              }
+            }
+          }
+        }
+      },
+      "StockReservationResponse": {
+        "type": "object",
+        "required": [
+          "reservationId",
+          "expiresAt",
+          "status"
+        ],
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ttlSecondsRemaining": {
+            "type": "integer",
+            "example": 900
+          },
+          "status": {
+            "type": "string",
+            "example": "HELD"
+          }
+        }
+      },
+      "CheckoutConfirmRequest": {
+        "type": "object",
+        "required": [
+          "reservationId",
+          "paymentMethod",
+          "shippingAddress"
+        ],
+        "properties": {
+          "reservationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "CREDIT_CARD",
+              "B2B_CREDIT_TERMS",
+              "BANK_TRANSFER"
+            ]
+          },
+          "paymentToken": {
+            "type": "string"
+          },
+          "shippingAddress": {
+            "type": "object",
+            "required": [
+              "recipientName",
+              "addressLine1",
+              "city",
+              "country"
+            ],
+            "properties": {
+              "recipientName": {
+                "type": "string"
+              },
+              "addressLine1": {
+                "type": "string"
+              },
+              "city": {
+                "type": "string"
+              },
+              "country": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "OrderDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "orderNumber",
+          "status",
+          "totalAmount",
+          "channel"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "orderNumber": {
+            "type": "string",
+            "example": "ORD-2026-1030-001"
+          },
+          "channel": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderItemDto"
+            }
+          }
+        }
+      },
+      "OrderItemDto": {
+        "type": "object",
+        "required": [
+          "skuCode",
+          "productTitle",
+          "quantity",
+          "unitPrice",
+          "lineTotal"
+        ],
+        "properties": {
+          "skuCode": {
+            "type": "string"
+          },
+          "productTitle": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "lineTotal": {
+            "type": "number"
+          }
+        }
+      },
+      "BulkOrderValidationResultDto": {
+        "type": "object",
+        "required": [
+          "totalRows",
+          "validRows",
+          "failedRows",
+          "lineItems"
+        ],
+        "properties": {
+          "totalRows": {
+            "type": "integer"
+          },
+          "validRows": {
+            "type": "integer"
+          },
+          "failedRows": {
+            "type": "integer"
+          },
+          "totalCalculatedAmount": {
+            "type": "number"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rowNumber": {
+                  "type": "integer"
+                },
+                "skuCode": {
+                  "type": "string"
+                },
+                "quantity": {
+                  "type": "integer"
+                },
+                "isValid": {
+                  "type": "boolean"
+                },
+                "errorMessage": {
+                  "type": "string"
+                },
+                "appliedUnitPrice": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BulkOrderConfirmRequest": {
+        "type": "object",
+        "required": [
+          "batchId",
+          "paymentMethod"
+        ],
+        "properties": {
+          "batchId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "enum": [
+              "B2B_CREDIT_TERMS",
+              "BANK_TRANSFER"
+            ]
+          }
+        }
+      },
+      "UserDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "fullName",
+          "role",
+          "isActive"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "InviteUserRequest": {
+        "type": "object",
+        "required": [
+          "email",
+          "fullName",
+          "role"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "TENANT_OWNER",
+              "WAREHOUSE_OPERATOR",
+              "STAFF_VIEWER"
+            ]
+          }
+        }
+      },
+      "DashboardKpiDto": {
+        "type": "object",
+        "required": [
+          "grossRevenue",
+          "totalOrders",
+          "averageOrderValue",
+          "lowStockSkusCount"
+        ],
+        "properties": {
+          "grossRevenue": {
+            "type": "number"
+          },
+          "totalOrders": {
+            "type": "integer"
+          },
+          "averageOrderValue": {
+            "type": "number"
+          },
+          "lowStockSkusCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "AuditLogDto": {
+        "type": "object",
+        "required": [
+          "id",
+          "actorEmail",
+          "action",
+          "entityType",
+          "entityId",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "actorEmail": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "entityType": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "diff": {
+            "type": "object"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PaginationMetaDto": {
+        "type": "object",
+        "required": [
+          "page",
+          "pageSize",
+          "totalItems",
+          "totalPages"
+        ],
+        "properties": {
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "totalItems": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
