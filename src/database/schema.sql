@@ -326,7 +326,40 @@ CREATE TABLE audit_logs (
 );
 
 -- ============================================================================
--- 8. INDEXES FOR HIGH-CONCURRENCY PERFORMANCE
+-- 8. AI AUTOMATION TABLES (SNAP-TO-ORDER & AUTONOMOUS FORECASTING)
+-- ============================================================================
+
+CREATE TABLE ai_po_parse_jobs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    actor_id UUID REFERENCES app_users(id) ON DELETE SET NULL,
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PROCESSING', 'COMPLETED', 'FAILED')),
+    file_url TEXT,
+    raw_extracted_text TEXT,
+    parsed_items JSONB NOT NULL DEFAULT '[]'::jsonb,
+    matched_order_id UUID REFERENCES orders(id) ON DELETE SET NULL,
+    confidence_score NUMERIC(4, 3) CHECK (confidence_score >= 0 AND confidence_score <= 1),
+    error_message TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE ai_inventory_forecasts (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    sku_id UUID NOT NULL REFERENCES skus(id) ON DELETE CASCADE,
+    daily_burn_rate NUMERIC(12, 4) NOT NULL DEFAULT 0,
+    runway_days NUMERIC(8, 2) NOT NULL DEFAULT 0,
+    suggested_reorder_qty INT NOT NULL DEFAULT 0,
+    risk_level VARCHAR(20) NOT NULL DEFAULT 'MEDIUM' CHECK (risk_level IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')),
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING_REVIEW' CHECK (status IN ('PENDING_REVIEW', 'APPROVED', 'DISMISSED')),
+    notes TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- 9. INDEXES FOR HIGH-CONCURRENCY PERFORMANCE
 -- ============================================================================
 
 CREATE INDEX idx_users_tenant_role ON app_users(tenant_id, role) WHERE deleted_at IS NULL;
@@ -336,9 +369,11 @@ CREATE INDEX idx_channel_alloc_lookup ON inventory_channel_allocations(tenant_id
 CREATE INDEX idx_reservations_active ON inventory_reservations(sku_id, status, expires_at);
 CREATE INDEX idx_orders_tenant_status ON orders(tenant_id, status, created_at DESC);
 CREATE INDEX idx_audit_logs_lookup ON audit_logs(tenant_id, entity_type, entity_id, created_at DESC);
+CREATE INDEX idx_ai_po_jobs_tenant ON ai_po_parse_jobs(tenant_id, status, created_at DESC);
+CREATE INDEX idx_ai_forecast_tenant_sku ON ai_inventory_forecasts(tenant_id, sku_id, risk_level);
 
 -- ============================================================================
--- 9. ROW-LEVEL SECURITY (RLS) POLICIES
+-- 10. ROW-LEVEL SECURITY (RLS) POLICIES
 -- ============================================================================
 
 -- Helper Macro function for RLS
@@ -373,6 +408,8 @@ ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE b2b_bulk_order_batches ENABLE ROW LEVEL SECURITY;
 ALTER TABLE webhook_endpoints ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_po_parse_jobs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_inventory_forecasts ENABLE ROW LEVEL SECURITY;
 
 -- Apply standard tenant isolation policy to all tables
 DO $$
@@ -383,7 +420,8 @@ DECLARE
         'price_tiers', 'tier_volume_rules', 'b2b_buyer_tier_assignments',
         'warehouses', 'inventory_physical_stock', 'inventory_channel_allocations',
         'inventory_reservations', 'inventory_sync_conflicts', 'orders',
-        'order_items', 'b2b_bulk_order_batches', 'webhook_endpoints', 'audit_logs'
+        'order_items', 'b2b_bulk_order_batches', 'webhook_endpoints', 'audit_logs',
+        'ai_po_parse_jobs', 'ai_inventory_forecasts'
     ];
 BEGIN
     FOREACH tbl IN ARRAY tenant_tables LOOP

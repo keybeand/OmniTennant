@@ -35,6 +35,8 @@ Related sources of truth: [DATABASE.md](DATABASE.md) · [schema.sql](../src/data
 | `b2b_bulk_order_batches` | Asynchronous Order Ingestion | `id` (UUID PK), `tenant_id` (FK), `buyer_id` (FK), `file_name`, `total_rows`, `valid_rows`, `failed_rows`, `status`, `error_summary` (JSONB). |
 | `webhook_endpoints` | Event Integrations | `id` (UUID PK), `tenant_id` (FK), `url`, `signing_secret` (HMAC SHA-256), `subscribed_events` (text array), `is_active`. |
 | `audit_logs` | Immutable Compliance Ledger | `id` (UUID PK), `tenant_id` (FK nullable), `actor_id` (FK), `actor_email`, `action`, `entity_type`, `entity_id`, `correlation_id`, `client_ip`, `diff` (JSONB redacted), `created_at`. |
+| `ai_po_parse_jobs` | AI Vision PO Extraction | `id` (UUID PK), `tenant_id` (FK), `actor_id` (FK), `status`, `file_url`, `raw_extracted_text`, `parsed_items` (JSONB), `matched_order_id`, `confidence_score`, `error_message`. |
+| `ai_inventory_forecasts` | Autonomous Copilot Forecasting | `id` (UUID PK), `tenant_id` (FK), `sku_id` (FK), `daily_burn_rate`, `runway_days`, `suggested_reorder_qty`, `risk_level` (CRITICAL/HIGH/MED/LOW), `status`, `notes`. |
 
 ---
 

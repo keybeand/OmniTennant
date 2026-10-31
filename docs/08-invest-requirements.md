@@ -41,6 +41,8 @@ Each requirement is structured to be small enough to implement, review, and test
 | **US16** | As a Tenant Owner or SuperAdmin, I want immutable, structured audit logging with correlation IDs so that all mutations and security actions are traceable. | Compliance & observability | US01, US02 | AC-UC04 |
 | **US17** | As a Tenant Owner, I want to invite staff members and configure role-based permissions (RBAC) so that administrative tasks are delegated safely. | Principle of least privilege | US02 | AC-UC06 |
 | **US18** | As a Tenant Owner, I want to customize storefront branding and register outbound webhook endpoints so that external applications receive order lifecycle events. | Extensibility & branding | US02 | AC-UC07 |
+| **US19** | As a B2B Buyer or Sales Rep, I want an AI-powered purchase order parser so that I can upload handwritten notes, PO PDFs, or raw message text and automatically generate a validated draft order with matched SKUs and volume pricing in seconds. | B2B ordering automation & zero-friction intake | US02, US04, US11 | AC-UC19 |
+| **US20** | As a Warehouse Operator or Tenant Owner, I want an autonomous AI inventory copilot so that stockout runways are forecasted continuously and restock PO recommendations are generated automatically before critical stock depletion occurs. | Autonomous supply chain & stockout prevention | US07, US09 | AC-UC20 |
 
 ---
 
@@ -68,6 +70,8 @@ Each requirement is structured to be small enough to implement, review, and test
 | **US16** | PASS | PASS | PASS | PASS | PASS | PASS | Append-only audit log table. Captures `tenant_id`, `actor_id`, `action`, `resource`, `correlation_id`, `client_ip`, and delta snapshot. |
 | **US17** | PASS | PASS | PASS | PASS | PASS | PASS | Role assignments validated via ASP.NET Core authorization policies (`[Authorize(Policy = "...")]`). Forbidden actions return 403. |
 | **US18** | PASS | PASS | PASS | PASS | PASS | PASS | Outbound webhook dispatcher implements exponential backoff retry (3 attempts) with dead-letter logging upon repeated failure. |
+| **US19** | PASS | PASS | PASS | PASS | PASS | PASS | Multimodal Vision + LLM pipeline extracts line items from images/PDFs. Fuzzy/vector matches against tenant SKUs; flags low-confidence items (<80%) for human confirmation. |
+| **US20** | PASS | PASS | PASS | PASS | PASS | PASS | Scheduled analytics worker calculates rolling 30-day velocity. Predicts depletion dates and generates auto-draft replenishment POs with configurable lead time. |
 
 ---
 

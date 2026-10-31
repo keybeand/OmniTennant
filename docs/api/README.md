@@ -238,6 +238,19 @@ curl -X POST http://localhost:5000/api/v1/b2b/bulk-orders/validate \
   -F "file=@wholesale_order_november.csv"
 ```
 
+### 8.7 AI-Driven B2B Purchase Order Parsing (Snap-to-Order)
+```bash
+curl -X POST http://localhost:5000/api/v1/orders/ai-parse-po \
+  -H "Authorization: Bearer <B2B_BUYER_TOKEN>" \
+  -F "file=@handwritten_purchase_order.jpg"
+```
+
+### 8.8 Fetch AI Stockout Forecasting & Recommendations
+```bash
+curl -X GET "http://localhost:5000/api/v1/inventory/ai-forecast?riskLevel=CRITICAL" \
+  -H "Authorization: Bearer <TENANT_STAFF_TOKEN>"
+```
+
 ---
 
 ## 9. Contract Verification & Tooling

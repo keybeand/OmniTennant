@@ -1,7 +1,7 @@
 
 # OmniTenant
 
-OmniTenant is a cloud-native B2B/B2C multi-tenant commerce and inventory synchronization platform. It enables brand owners and distributors to manage isolated storefronts, track omnichannel inventory allocations in real time, execute bulk wholesale orders, and handle high-concurrency checkout with strong data consistency and row-level tenant isolation.
+OmniTenant is a cloud-native B2B/B2C multi-tenant commerce and omnichannel inventory platform powered by an **Autonomous AI Automation Engine**. It enables brand owners and distributors to manage isolated storefronts, execute instant **Snap-to-Order AI B2B purchase order parsing**, leverage **autonomous stockout forecasting copilot**, track omnichannel inventory allocations in real time, execute bulk wholesale orders, and handle high-concurrency checkout with zero overselling guarantee and row-level tenant isolation.
 
 ## 1. Requirements — INVEST, Use Cases, and Acceptance Criteria
 
@@ -14,15 +14,15 @@ Requirements define the operational scope, actor responsibilities, transactional
 
 ### 1.2 INVEST Requirements
 
-The V1 scope includes 18 core user stories spanning multi-tenant authentication, dynamic catalog management, distributed inventory tracking, B2B wholesale orders, high-concurrency B2C checkout, webhook synchronization, and administrative audit trails. Each user story is evaluated and refined against the INVEST criteria before implementation.
+The V1 scope includes 20 core user stories spanning multi-tenant authentication, dynamic catalog management, distributed inventory tracking, B2B wholesale orders, high-concurrency B2C checkout, webhook synchronization, administrative audit trails, and autonomous AI automation. Each user story is evaluated and refined against the INVEST criteria before implementation.
 
 | Criterion | Meaning in OmniTenant |
 | :--- | :--- |
 | **Independent** | Feature stories, such as catalog browsing and order checkout, are decoupled through well-defined domain events and boundaries. |
 | **Negotiable** | Cart storage engines and inventory reservation backends, such as Redis or database locks, can vary as long as consistency contracts hold. |
-| **Valuable** | Each capability delivers tangible business outcomes, including multi-tenant isolation, inventory overselling prevention, and B2B volume pricing. |
+| **Valuable** | Each capability delivers tangible business outcomes, including multi-tenant isolation, inventory overselling prevention, B2B volume pricing, and automated AI order intake. |
 | **Estimable** | Data access boundaries, idempotency keys, isolation requirements, and rollback behaviors are documented. |
-| **Small** | Complex workflows, such as two-phase checkout, are decomposed into discrete API, locking, persistence, and event-dispatch tasks. |
+| **Small** | Complex workflows, such as two-phase checkout and multimodal PO extraction, are decomposed into discrete API, locking, persistence, and event-dispatch tasks. |
 | **Testable** | Every story maps to measurable acceptance criteria covering race-condition behavior, RBAC constraints, and tenant boundary enforcement. |
 
 #### V1 User Story Overview
@@ -38,6 +38,8 @@ US15         Omnichannel Webhook Ingestion & External Inventory Sync
 US16         Audit Logging & Distributed Traceability
 US17         Tenant User Management & Role-Based Permissions
 US18         Merchant Storefront Configuration & Webhook Endpoints
+US19         AI-Driven B2B Purchase Order Parsing (Snap-to-Order)
+US20         Autonomous AI Inventory Copilot & Predictive Stockout
 ```
 
 All V1 stories guarantee strong tenant data segregation at the persistence tier through `tenant_id` query scoping, atomic inventory decrement using pessimistic or distributed Redis locks, and idempotency key enforcement on all checkout requests.
@@ -308,8 +310,8 @@ See the [detailed entity-relationship diagram](docs/DATABASE.md), [data model sp
 The HTTP contract is defined with OpenAPI 3.0.3 and organized into Authentication & Tenants, Catalog & SKUs, Wholesale Pricing, Omnichannel Inventory, Checkout & Orders, B2B Bulk Orders, Staff & RBAC, and Analytics & Audit.
 
 ```text
-25 paths
-36 reusable schemas
+28 paths (including Multimodal AI PO extraction & Autonomous Inventory Forecasting)
+39 reusable schemas
 Stateless Bearer JWT security (15-min TTL) with tenant context resolution
 Strict Idempotency-Key enforcement on mutating checkout & webhook requests
 Two-phase stock reservation protocol (Redis Redlock + 15-min hold)

@@ -62,12 +62,19 @@ flowchart LR
         AUD[audit_logs]
     end
 
+    subgraph aiGroup [AI Automation & Intelligence]
+        direction TB
+        AIPO[ai_po_parse_jobs]
+        AIFC[ai_inventory_forecasts]
+    end
+
     T --> identityGroup
     T --> catalogGroup
     T --> pricingGroup
     T --> inventoryGroup
     T --> commerceGroup
     T --> sharedGroup
+    T --> aiGroup
 
     U --> B2BP
     CAT --> P --> SKU
@@ -78,6 +85,8 @@ flowchart LR
     SKU --> RES
     O --> OI
     SKU --> OI
+    SKU --> AIFC
+    O -.-> AIPO
 ```
 
 ---
@@ -333,6 +342,33 @@ erDiagram
         uuid correlation_id
         inet client_ip
         jsonb diff
+        timestamptz created_at
+    }
+
+    ai_po_parse_jobs {
+        uuid id PK
+        uuid tenant_id FK
+        uuid actor_id FK
+        varchar status
+        text file_url
+        text raw_extracted_text
+        jsonb parsed_items
+        uuid matched_order_id FK
+        numeric confidence_score
+        text error_message
+        timestamptz created_at
+    }
+
+    ai_inventory_forecasts {
+        uuid id PK
+        uuid tenant_id FK
+        uuid sku_id FK
+        numeric daily_burn_rate
+        numeric runway_days
+        integer suggested_reorder_qty
+        varchar risk_level
+        varchar status
+        text notes
         timestamptz created_at
     }
 ```

@@ -43,6 +43,8 @@ Product name: **OmniTenant**.
 | **B2B Bulk CSV Order Upload** | | | | ✓ | |
 | **Order Status Tracking & Invoices** | View all | ✓ | ✓ | Own orders | Own orders |
 | **Tenant Audit Activity Trail** | Global | ✓ | | | |
+| **AI-Driven B2B PO Parsing (Snap-to-Order)** | | ✓ | | ✓ | |
+| **Autonomous AI Inventory Copilot & Forecasting** | | ✓ | ✓ | | |
 
 Unauthorized endpoint or UI route access returns `403 Forbidden` with standardized `ProblemDetails` payloads.
 
@@ -330,3 +332,34 @@ flowchart LR
 - **Alternative flow:** File syntax error or unresolvable SKUs produces detailed validation report identifying offending rows; valid rows are previewed for partial approval or all-or-nothing correction.
 - **Permission:** `b2b:bulk_order`
 - **Result:** High-volume wholesale orders placed efficiently without manual line-by-line cart entry.
+
+### UC19 AI-Driven B2B Purchase Order Parsing (Snap-to-Order)
+
+- **Actor:** `B2B_BUYER`, `TENANT_OWNER`
+- **Preconditions:** Authenticated tenant account; digital image (PNG/JPEG) or PDF of handwritten order, paper invoice, or raw text message.
+- **Main flow:**
+  1. User uploads document/image or pastes unstructured purchase order text.
+  2. System dispatches file to Multimodal Vision + LLM pipeline via background ingestion worker.
+  3. AI extracts line-item entities (product name, attributes, requested quantity, supplier notes).
+  4. System executes scoped semantic/fuzzy match against tenant's product catalog (PostgreSQL trigram / pgvector), resolving noisy human text to exact `sku_id`s.
+  5. Evaluates real-time channel stock availability and automatically calculates B2B volume tier discounts.
+  6. Returns structured Draft Order preview with per-line confidence scores ($0.0 - 1.0$), highlighting ambiguous or low-confidence matches for single-click user confirmation.
+  7. User reviews and clicks "Confirm Order" to atomically create an official wholesale order.
+- **Alternative flow:** If an extracted product has zero match confidence or ambiguous variants (e.g. multiple sizes match), system flags line item as `ATTENTION_REQUIRED` and provides an autocomplete dropdown for manual selection.
+- **Permission:** `b2b:ai_order`
+- **Result:** Drastically reduces B2B order entry time from 15 minutes to 3 seconds, eliminating manual data entry bottlenecks.
+
+### UC20 Autonomous AI Inventory Copilot & Forecasting
+
+- **Actor:** `TENANT_OWNER`, `WAREHOUSE_OPERATOR`
+- **Preconditions:** Historical sales transactions and active channel inventory allocations.
+- **Main flow:**
+  1. Scheduled AI Analytics Worker analyzes 30-day rolling sales velocity, seasonality, and consumption rates across all sales channels.
+  2. Computes "Runway Days" (estimated days until stockout) for each SKU: $\text{Runway} = \frac{\text{AvailableStock}}{\text{DailyBurnRate}}$.
+  3. Detects high-risk SKUs where Runway $\le$ Supplier Lead Time + Safety Buffer.
+  4. Generates an autonomous replenishment recommendation (Suggested Reorder Quantity, Estimated Restock Cost, Supplier Info).
+  5. Posts real-time alert to Warehouse Dashboard and dispatches notification to operators.
+  6. Operator clicks "Approve Recommendation" to automatically generate a Purchase Order (PO) and push stock update expectation to WMS via webhook.
+- **Alternative flow:** If historical data is insufficient (< 7 days), system falls back to configured static safety thresholds with an informative banner.
+- **Permission:** `inventory:forecast`
+- **Result:** Proactive stockout prevention and autonomous replenishment workflow eliminating human calculation errors.

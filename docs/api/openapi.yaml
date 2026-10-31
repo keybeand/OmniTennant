@@ -843,6 +843,123 @@ paths:
                   meta:
                     $ref: '#/components/schemas/PaginationMetaDto'
 
+  # ==========================================================================
+  # AI AUTOMATION & INTELLIGENCE
+  # ==========================================================================
+  /orders/ai-parse-po:
+    post:
+      tags: [AI Automation]
+      summary: "AI-Driven B2B Purchase Order Parsing (Snap-to-Order) (UC19)"
+      description: Uploads an image (PNG, JPEG, WebP) or PDF of a handwritten/printed order or submits raw message text. Multimodal AI extracts items and fuzzy-matches against tenant SKUs.
+      security:
+        - BearerAuth: []
+        - TenantIdHeader: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Scanned document or photo of handwritten/printed purchase order.
+                rawText:
+                  type: string
+                  description: Optional raw order text from chat/email.
+      responses:
+        '200':
+          description: AI parsed purchase order with matched SKUs, confidence scores, and calculated volume pricing.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiParsedPoResponse'
+        '400':
+          $ref: '#/components/responses/ProblemBadRequest'
+        '401':
+          $ref: '#/components/responses/ProblemUnauthorized'
+        '403':
+          $ref: '#/components/responses/ProblemForbidden'
+
+  /inventory/ai-forecast:
+    get:
+      tags: [AI Automation]
+      summary: "Autonomous AI Inventory Runway & Stockout Forecast (UC20)"
+      description: Returns AI-forecasted stockout runway days, depletion burn rates, and automated restock suggestions per SKU.
+      security:
+        - BearerAuth: []
+        - TenantIdHeader: []
+      parameters:
+        - name: riskLevel
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ALL, CRITICAL, HIGH, MEDIUM, LOW]
+            default: ALL
+          description: Filter forecast alerts by urgency risk level.
+      responses:
+        '200':
+          description: List of autonomous inventory replenishment recommendations.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AiInventoryForecastDto'
+                  summary:
+                    type: object
+                    properties:
+                      totalSkusAnalyzed:
+                        type: integer
+                      criticalDepletionCount:
+                        type: integer
+                      projectedStockoutWithin7Days:
+                        type: integer
+        '401':
+          $ref: '#/components/responses/ProblemUnauthorized'
+        '403':
+          $ref: '#/components/responses/ProblemForbidden'
+
+  /inventory/ai-forecast/{id}/approve:
+    post:
+      tags: [AI Automation]
+      summary: "Approve AI Replenishment Recommendation (UC20)"
+      description: Approves an AI restock recommendation, automatically generating a supplier Purchase Order.
+      security:
+        - BearerAuth: []
+        - TenantIdHeader: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Recommendation approved and draft purchase order generated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  forecastId:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: APPROVED
+                  purchaseOrderReference:
+                    type: string
+                    example: PO-SUPP-2026-0042
+        '404':
+          $ref: '#/components/responses/ProblemNotFound'
+
 # ============================================================================
 # COMPONENTS & SCHEMAS
 # ============================================================================
@@ -879,6 +996,18 @@ components:
             $ref: '#/components/schemas/ProblemDetails'
     ProblemConflict:
       description: State conflict, slug collision, or insufficient stock
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    ProblemBadRequest:
+      description: Invalid payload or validation error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    ProblemNotFound:
+      description: Resource not found within tenant scope
       content:
         application/problem+json:
           schema:
@@ -1482,3 +1611,123 @@ components:
         pageSize: { type: integer }
         totalItems: { type: integer }
         totalPages: { type: integer }
+
+    AiParsedPoResponse:
+      type: object
+      required: [jobId, status, overallConfidence, extractedLines, calculatedTotal]
+      properties:
+        jobId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [COMPLETED, REQUIRES_ATTENTION, FAILED]
+          example: COMPLETED
+        overallConfidence:
+          type: number
+          format: float
+          example: 0.94
+        rawExtractedText:
+          type: string
+          example: "50 pcs T-Shirt Black L, 20 pcs Jeans Blue 32"
+        extractedLines:
+          type: array
+          items:
+            $ref: '#/components/schemas/AiParsedPoLineDto'
+        calculatedTotal:
+          type: number
+          example: 2450.00
+        currency:
+          type: string
+          example: USD
+
+    AiParsedPoLineDto:
+      type: object
+      required: [rawInput, matchedSkuCode, requestedQuantity, confidenceScore, matchStatus, unitPrice, lineTotal]
+      properties:
+        rawInput:
+          type: string
+          example: "T-Shirt Black L"
+        matchedSkuId:
+          type: string
+          format: uuid
+        matchedSkuCode:
+          type: string
+          example: "SKU-TSHIRT-BLK-L"
+        productTitle:
+          type: string
+          example: "Classic Cotton T-Shirt - Black / L"
+        requestedQuantity:
+          type: integer
+          example: 50
+        availableStock:
+          type: integer
+          example: 120
+        unitPrice:
+          type: number
+          example: 25.00
+        lineTotal:
+          type: number
+          example: 1250.00
+        appliedTierBreak:
+          type: string
+          example: "50+ units (-15%)"
+        confidenceScore:
+          type: number
+          format: float
+          example: 0.96
+        matchStatus:
+          type: string
+          enum: [AUTO_MATCHED, NEEDS_REVIEW, NO_MATCH]
+          example: AUTO_MATCHED
+        alternativeSuggestions:
+          type: array
+          items:
+            type: string
+            example: "SKU-TSHIRT-BLK-XL"
+
+    AiInventoryForecastDto:
+      type: object
+      required: [id, skuId, skuCode, productTitle, currentAvailableStock, dailyBurnRate, runwayDays, riskLevel, suggestedReorderQty, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        skuId:
+          type: string
+          format: uuid
+        skuCode:
+          type: string
+          example: "SKU-TSHIRT-BLK-L"
+        productTitle:
+          type: string
+          example: "Classic Cotton T-Shirt - Black / L"
+        currentAvailableStock:
+          type: integer
+          example: 45
+        dailyBurnRate:
+          type: number
+          example: 15.2
+        runwayDays:
+          type: number
+          example: 2.96
+        riskLevel:
+          type: string
+          enum: [CRITICAL, HIGH, MEDIUM, LOW]
+          example: CRITICAL
+        suggestedReorderQty:
+          type: integer
+          example: 300
+        supplierLeadTimeDays:
+          type: integer
+          example: 5
+        estimatedRestockCost:
+          type: number
+          example: 4500.00
+        status:
+          type: string
+          enum: [PENDING_REVIEW, APPROVED, DISMISSED]
+          example: PENDING_REVIEW
+        forecastGeneratedAt:
+          type: string
+          format: date-time

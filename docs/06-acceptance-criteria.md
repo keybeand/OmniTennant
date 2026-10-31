@@ -157,4 +157,28 @@ These criteria define the observable, testable conditions of success for all V1 
 
 ---
 
+## AC-UC19 — AI-Driven B2B PO Parsing (Snap-to-Order)
+
+- Supports multi-format ingest: PNG, JPEG, WebP images of handwritten notes/paper receipts, multi-page PDFs, and raw text order messages up to 10 MB.
+- AI pipeline extracts line items, quantities, and optional notes; parses within $\le 5$ seconds under normal load.
+- Product matching resolves noisy human text to tenant catalog SKUs scoped strictly to `tenant_id` (cross-tenant matching is structurally impossible).
+- Returns structured JSON response with per-line confidence scores ($0.00 - 1.00$):
+  - Items with confidence $\ge 0.80$ are marked `AUTO_MATCHED`.
+  - Items with confidence $< 0.80$ or ambiguous matches are marked `NEEDS_REVIEW` with top 3 alternative SKU suggestions.
+- Automatically applies B2B tiered volume pricing for matched quantities and evaluates real-time channel stock.
+- Confirmed draft order transitions to standard checkout pipeline respecting `Idempotency-Key` and two-phase stock locking.
+
+---
+
+## AC-UC20 — Autonomous AI Inventory Copilot & Forecasting
+
+- Calculates rolling 30-day sales velocity and consumption rates across all sales channels per SKU.
+- Dynamically predicts "Runway Days" (time to stockout): $\text{Runway} = \frac{\text{AvailableStock}}{\text{DailyBurnRate}}$.
+- Automatically triggers high-priority replenishment alert when $\text{Runway} \le \text{SupplierLeadTime} + \text{SafetyBuffer}$.
+- Suggests optimal reorder quantity: $\text{ReorderQty} = (\text{TargetRunwayDays} \times \text{DailyBurnRate}) - \text{AvailableStock}$.
+- All forecast records and suggestions are stored in `ai_inventory_forecasts` with PostgreSQL RLS isolation.
+- Approving a recommendation atomically generates a supplier Purchase Order (PO) and dispatches an outbound webhook event `inventory.reorder_approved`.
+
+---
+
 **Related:** [Actors, roles, and use cases](03-use-cases.md) · [INVEST Requirements](08-invest-requirements.md)
