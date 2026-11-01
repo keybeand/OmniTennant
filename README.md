@@ -11,61 +11,6 @@ Requirements define the operational scope, actor responsibilities, transactional
 
 ![OmniTenant Strategic Feature Mind Map](docs/images/mindmap.png)
 
-The mind map outlines the functional architecture of OmniTenant, explicitly **highlighting the P0 Killer Capabilities** (Tri-Agent AI Automation and Zero-Overselling Concurrency Engine) that differentiate the platform from conventional static commerce engines:
-
-```mermaid
-%%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1168bd", "primaryTextColor": "#fff", "lineColor": "#0b4f9e"}}}%%
-flowchart TB
-    root(["<b>OmniTenant OS</b><br/><i>Autonomous AI Commerce Platform</i>"])
-
-    subgraph p0Group["🔥 P0: KILLER CAPABILITIES (CORE STRATEGIC FOCUS)"]
-        direction TB
-        subgraph aiCore["🤖 Tri-Agent Closed-Loop AI Automation Engine"]
-            agent1["<b>Agent 1: Sales Operations Agent (Snap-to-Order)</b><br/>• Multimodal Vision OCR (Handwritten notes, paper invoices, PDF/Zalo)<br/>• Fuzzy/Semantic SKU Match into Tenant Catalog (RLS isolated)<br/>• Real-Time Stock Check & Dynamic Volume Tier Pricing<br/>• Instant Validated Draft Order Generation (≤ 3 seconds)"]
-            agent2["<b>Agent 2: Inventory & Procurement Copilot</b><br/>• Continuous 30-Day Sales Velocity Monitor per Channel<br/>• Stockout Runway Days Prediction (Days-to-Depletion)<br/>• Automated Restock Purchase Order (PO) Drafting with Lead Times<br/>• Webhook Expectation Dispatch to External WMS/ERP"]
-            agent3["<b>Agent 3: Revenue & Dynamic Markdown Agent</b><br/>• Dead-Stock Stagnation Scanner (Inventory age > 30 Days, Velocity drop > 50%)<br/>• Price Elasticity Modeling with Gross Margin Floor Protection (≥ 10%)<br/>• One-Click Flash Sale & Wholesale Clearance Deployment<br/>• Automated Scheduled Price Rollback Timer"]
-        end
-
-        subgraph concCore["⚡ Zero-Overselling Concurrency Engine"]
-            lockEngine["<b>Two-Phase Stock Reservation Protocol</b><br/>• Phase 1: Ephemeral Redis Redlock (~10ms) per SKU<br/>• Phase 2: Optimistic Version Verification on Allocation<br/>• 15-Minute Temporary Hold (inventory_reservations)<br/>• Background Reaper Auto-Release on Payment Timeout"]
-            idempEngine["<b>Transaction & Idempotency Guarantee</b><br/>• Idempotency-Key (UUID v4) Enforced on Mutating Endpoints<br/>• 24-Hour Atomic Result Replay from In-Memory Cache<br/>• Zero Double Charges & Zero Inconsistent Stock States"]
-        end
-    end
-
-    subgraph p1Group["⚡ P1: ENTERPRISE COMMERCIAL & ISOLATION FOUNDATION"]
-        direction TB
-        subgraph rlsCore["🔒 Deep Tenant Isolation"]
-            rls["<b>PostgreSQL Row-Level Security (RLS)</b><br/>• Session-scoped app.current_tenant_id<br/>• Database-enforced isolation (Zero data leak risk)<br/>• YARP Gateway Subdomain/CNAME Routing"]
-        end
-        subgraph b2bCore["💼 Wholesale & Omnichannel Distribution"]
-            b2b["<b>B2B Tiered Volume Pricing & Bulk Operations</b><br/>• Quantity Break Matrices & MOQs<br/>• High-Speed 2,000-Row CSV Batch Ingest<br/>• Corporate Credit Terms (Net 30/60)"]
-            omni["<b>Omnichannel Inventory Allocation</b><br/>• Dynamic Quotas (Storefront, B2B, Marketplace)<br/>• Safety Stock Buffer Protection<br/>• HMAC SHA-256 External WMS Ingestion"]
-        end
-    end
-
-    subgraph p2Group["⚙️ P2: COMMERCE & ADMINISTRATIVE BASELINE"]
-        direction LR
-        cat["Faceted Product Catalog & Variants"]
-        auth["15-Min Stateless JWT & RBAC"]
-        portal["Storefront UI & Backoffice Console"]
-        audit["Immutable Audit Trail & RFC 7807"]
-    end
-
-    root ==> p0Group
-    root --> p1Group
-    root --> p2Group
-
-    classDef killer fill:#fff5eb,stroke:#d97706,stroke-width:2px,color:#9a3412
-    classDef p0 fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e40af
-    classDef p1 fill:#f0fdf4,stroke:#16a34a,stroke-width:1px,color:#166534
-    classDef p2 fill:#f8fafc,stroke:#94a3b8,stroke-width:1px,color:#475569
-
-    class agent1,agent2,agent3 killer
-    class lockEngine,idempEngine p0
-    class rls,b2b,omni p1
-    class cat,auth,portal,audit p2
-```
-
 #### Strategic Feature Highlights & Differentiators
 
 | Capability Tier | Feature | Technical Depth & Mechanism | WOW Factor / Business Impact |
