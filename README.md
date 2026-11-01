@@ -9,7 +9,9 @@ Requirements define the operational scope, actor responsibilities, transactional
 
 ### 1.1 Product Mind Map & Strategic Feature Hierarchy
 
-The following mind map outlines the functional architecture of OmniTenant, explicitly **highlighting the P0 Killer Capabilities** (Tri-Agent AI Automation and Zero-Overselling Concurrency Engine) that differentiate the platform from conventional static commerce engines:
+![OmniTenant Strategic Feature Mind Map](docs/images/mindmap.png)
+
+The mind map outlines the functional architecture of OmniTenant, explicitly **highlighting the P0 Killer Capabilities** (Tri-Agent AI Automation and Zero-Overselling Concurrency Engine) that differentiate the platform from conventional static commerce engines:
 
 ```mermaid
 %%{init: {"theme": "base", "themeVariables": {"primaryColor": "#1168bd", "primaryTextColor": "#fff", "lineColor": "#0b4f9e"}}}%%
