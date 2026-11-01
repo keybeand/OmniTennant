@@ -251,6 +251,14 @@ curl -X GET "http://localhost:5000/api/v1/inventory/ai-forecast?riskLevel=CRITIC
   -H "Authorization: Bearer <TENANT_STAFF_TOKEN>"
 ```
 
+### 8.9 Activate Autonomous Dead-Stock Markdown Campaign
+```bash
+curl -X POST http://localhost:5000/api/v1/pricing/ai-markdown-proposals/c0a80123-0000-0000-0000-000000000042/activate \
+  -H "Authorization: Bearer <TENANT_STAFF_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{ "durationHours": 48 }'
+```
+
 ---
 
 ## 9. Contract Verification & Tooling

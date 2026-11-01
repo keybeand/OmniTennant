@@ -1,7 +1,7 @@
 
-# OmniTenant
+# OmniTenant — Autonomous AI Commerce & Inventory Operating System
 
-OmniTenant is a cloud-native B2B/B2C multi-tenant commerce and omnichannel inventory platform powered by an **Autonomous AI Automation Engine**. It enables brand owners and distributors to manage isolated storefronts, execute instant **Snap-to-Order AI B2B purchase order parsing**, leverage **autonomous stockout forecasting copilot**, track omnichannel inventory allocations in real time, execute bulk wholesale orders, and handle high-concurrency checkout with zero overselling guarantee and row-level tenant isolation.
+OmniTenant is an enterprise multi-tenant commerce and omnichannel inventory operating system powered by a **Tri-Agent Closed-Loop AI Automation Engine**. It enables brand owners and distributors to manage isolated storefronts, execute instant **Snap-to-Order AI B2B purchase order parsing (Agent 1)**, leverage **autonomous stockout forecasting & replenishment (Agent 2)**, automate **dead-stock liquidation & dynamic markdown campaigns (Agent 3)**, track omnichannel inventory allocations in real time, and handle high-concurrency checkout with zero overselling guarantee and row-level tenant isolation.
 
 ## 1. Requirements — INVEST, Use Cases, and Acceptance Criteria
 
@@ -14,7 +14,7 @@ Requirements define the operational scope, actor responsibilities, transactional
 
 ### 1.2 INVEST Requirements
 
-The V1 scope includes 20 core user stories spanning multi-tenant authentication, dynamic catalog management, distributed inventory tracking, B2B wholesale orders, high-concurrency B2C checkout, webhook synchronization, administrative audit trails, and autonomous AI automation. Each user story is evaluated and refined against the INVEST criteria before implementation.
+The V1 scope includes 21 core user stories spanning multi-tenant authentication, dynamic catalog management, distributed inventory tracking, B2B wholesale orders, high-concurrency B2C checkout, webhook synchronization, administrative audit trails, and closed-loop multi-agent automation. Each user story is evaluated and refined against the INVEST criteria before implementation.
 
 | Criterion | Meaning in OmniTenant |
 | :--- | :--- |
@@ -38,8 +38,9 @@ US15         Omnichannel Webhook Ingestion & External Inventory Sync
 US16         Audit Logging & Distributed Traceability
 US17         Tenant User Management & Role-Based Permissions
 US18         Merchant Storefront Configuration & Webhook Endpoints
-US19         AI-Driven B2B Purchase Order Parsing (Snap-to-Order)
-US20         Autonomous AI Inventory Copilot & Predictive Stockout
+US19         AI Sales Operations Agent: B2B Purchase Order Parsing (Snap-to-Order)
+US20         AI Procurement Agent: Stockout Runway Forecast & Auto-Replenishment
+US21         AI Revenue Agent: Autonomous Dead-Stock Liquidation & Dynamic Markdown
 ```
 
 All V1 stories guarantee strong tenant data segregation at the persistence tier through `tenant_id` query scoping, atomic inventory decrement using pessimistic or distributed Redis locks, and idempotency key enforcement on all checkout requests.
@@ -310,8 +311,8 @@ See the [detailed entity-relationship diagram](docs/DATABASE.md), [data model sp
 The HTTP contract is defined with OpenAPI 3.0.3 and organized into Authentication & Tenants, Catalog & SKUs, Wholesale Pricing, Omnichannel Inventory, Checkout & Orders, B2B Bulk Orders, Staff & RBAC, and Analytics & Audit.
 
 ```text
-28 paths (including Multimodal AI PO extraction & Autonomous Inventory Forecasting)
-39 reusable schemas
+30 paths (including Tri-Agent AI Automation: PO extraction, Runway Forecasting & Dead-Stock Liquidation)
+41 reusable schemas
 Stateless Bearer JWT security (15-min TTL) with tenant context resolution
 Strict Idempotency-Key enforcement on mutating checkout & webhook requests
 Two-phase stock reservation protocol (Redis Redlock + 15-min hold)

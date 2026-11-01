@@ -181,4 +181,15 @@ These criteria define the observable, testable conditions of success for all V1 
 
 ---
 
+## AC-UC21 — Autonomous Dead-Stock Liquidation & Dynamic Markdown
+
+- System scans SKUs daily; flags items with $\text{InventoryAge} \ge 30$ days and a $>50\%$ drop in 14-day sales velocity relative to previous period.
+- Markdown algorithm enforces a strict gross margin floor: $\text{ProposedMarkdownPrice} \ge \text{CostPrice} \times 1.10$. Markdown discounts exceeding this floor are automatically clamped to preserve 10% gross margin.
+- Generates campaign proposals categorizing recommendations into `FLASH_SALE` (48-hour consumer promo) or `B2B_CLEARANCE_TIER` (volume-tier wholesale clearance).
+- Campaign activation executes atomically: updates active price rules in `tier_volume_rules` or promotional storefront banners, recording the approving actor in `audit_logs`.
+- Proposals and activation states persist in `ai_pricing_markdown_proposals` table protected by PostgreSQL RLS.
+- Scheduled expiration background job automatically rolls back promotional prices to base retail/tier rates upon campaign completion.
+
+---
+
 **Related:** [Actors, roles, and use cases](03-use-cases.md) · [INVEST Requirements](08-invest-requirements.md)

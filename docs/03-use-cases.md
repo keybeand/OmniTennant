@@ -45,6 +45,7 @@ Product name: **OmniTenant**.
 | **Tenant Audit Activity Trail** | Global | ✓ | | | |
 | **AI-Driven B2B PO Parsing (Snap-to-Order)** | | ✓ | | ✓ | |
 | **Autonomous AI Inventory Copilot & Forecasting** | | ✓ | ✓ | | |
+| **Autonomous AI Dead-Stock Markdown Agent** | | ✓ | | | |
 
 Unauthorized endpoint or UI route access returns `403 Forbidden` with standardized `ProblemDetails` payloads.
 
@@ -363,3 +364,69 @@ flowchart LR
 - **Alternative flow:** If historical data is insufficient (< 7 days), system falls back to configured static safety thresholds with an informative banner.
 - **Permission:** `inventory:forecast`
 - **Result:** Proactive stockout prevention and autonomous replenishment workflow eliminating human calculation errors.
+
+### UC21 Autonomous Dead-Stock Liquidation & Dynamic Markdown
+
+- **Actor:** `TENANT_OWNER`
+- **Preconditions:** Active product SKUs with inventory age $\ge 30$ days and a $>50\%$ deceleration in 14-day sales velocity.
+- **Main flow:**
+  1. Revenue Optimization AI Agent executes daily inventory stagnation scan across all channels.
+  2. Identifies "Dead Stock" SKUs tying up warehouse capital:
+     $$\text{StagnationScore} = \text{DaysInInventory} \times \left(1 - \frac{\text{RecentVelocity}}{\text{HistoricalAverageVelocity}}\right)$$
+  3. Computes optimal price elasticity discount rate (15% to 35%) to stimulate demand while protecting gross margin floor.
+  4. Generates an automated Liquidation Campaign Proposal:
+     - Flash Sale schedule (e.g. 48-hour storefront markdown banner).
+     - B2B Bulk Clearance Tier (special volume break for corporate buyers).
+  5. Tenant Owner receives alert in Admin Dashboard and clicks "Activate Campaign".
+  6. System atomically updates channel price matrices and schedules an automatic price rollback upon campaign expiration.
+- **Alternative flow:** If product cost floor would be breached by proposed discount, system caps markdown at minimum margin preservation threshold and flags for human manual review.
+- **Permission:** `pricing:ai_markdown`
+- **Result:** Automated capital recovery from slow-moving inventory without manual spreadsheet analysis.
+
+---
+
+## Autonomous Tri-Agent Closed-Loop Architecture
+
+The 3 AI Agents work in a self-reinforcing, closed-loop cycle across the enterprise commerce lifecycle:
+
+```mermaid
+flowchart TD
+    subgraph MarketDemand["1. Demand Intake Layer"]
+        B2B[B2B Corporate Orders]
+        B2C[B2C Storefront Traffic]
+    end
+
+    subgraph Agent1["Agent 1: Sales Operations Agent (UC19)"]
+        OCR["Multimodal Vision & Document OCR"]
+        Fuzzy["Fuzzy SKU & Attribute Normalizer"]
+        DraftOrder["Autonomous Draft Order Generator"]
+        OCR --> Fuzzy --> DraftOrder
+    end
+
+    subgraph CorePlatform["OmniTenant Enterprise Execution Engine"]
+        RLS[("PostgreSQL RLS Isolation")]
+        Lock["Redis Redlock Two-Phase Hold"]
+        Alloc["Omnichannel Inventory Allocation"]
+    end
+
+    subgraph Agent2["Agent 2: Inventory & Procurement Agent (UC20)"]
+        Velocity["Sales Velocity Monitor (30d)"]
+        Runway["Runway & Stockout Predictor"]
+        PO["Autonomous Supplier Restock PO"]
+        Velocity --> Runway --> PO
+    end
+
+    subgraph Agent3["Agent 3: Revenue Optimization Agent (UC21)"]
+        Stagnant["Dead-Stock Stagnation Scanner"]
+        Elasticity["Price Elasticity Margin Engine"]
+        Campaign["Autonomous Flash Sale & B2B Clearance"]
+        Stagnant --> Elasticity --> Campaign
+    end
+
+    MarketDemand --> Agent1
+    Agent1 --> Lock --> CorePlatform
+    CorePlatform --> Velocity
+    PO -.->|"WMS Restock Webhook"| Alloc
+    Alloc --> Stagnant
+    Campaign -.->|"Auto-Adjust Price Matrix"| MarketDemand
+```

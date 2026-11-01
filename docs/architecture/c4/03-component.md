@@ -26,7 +26,7 @@ flowchart TB
             commerceControllers["Checkout & Order Controllers<br/><i>[Controller]</i>"]
             inventoryControllers["Inventory & Webhook Controllers<br/><i>[Controller]</i>"]
             catalogControllers["Catalog & Pricing Controllers<br/><i>[Controller]</i>"]
-            aiControllers["AI Automation Controllers<br/><i>[Controller]</i><br/>PO parsing & inventory copilot"]
+            aiControllers["AI Automation Controllers<br/><i>[Controller]</i><br/>Tri-Agent Orchestrator"]
         end
 
         subgraph appLayer["2. Application Layer (CQRS with MediatR)"]
@@ -37,12 +37,14 @@ flowchart TB
                 webhookCmd["IngestWebhookCommandHandler<br/><i>[Command Handler]</i>"]
                 bulkCsvCmd["ProcessBulkCsvCommandHandler<br/><i>[Command Handler]</i>"]
                 parseAiPoCmd["ParsePoDocumentCommandHandler<br/><i>[Command Handler]</i>"]
+                activateMarkdownCmd["ActivateMarkdownCampaignCommandHandler<br/><i>[Command Handler]</i>"]
             end
             subgraph queries["Queries (Read Models)"]
                 catalogQuery["GetFacetedCatalogQueryHandler<br/><i>[Query Handler]</i>"]
                 pricingQuery["EvaluateDynamicPriceQueryHandler<br/><i>[Query Handler]</i>"]
                 kpiQuery["GetDashboardKpisQueryHandler<br/><i>[Query Handler]</i>"]
                 forecastQuery["GetAiInventoryForecastQueryHandler<br/><i>[Query Handler]</i>"]
+                deadStockQuery["GetAiDeadStockProposalsQueryHandler<br/><i>[Query Handler]</i>"]
             end
         end
 
@@ -52,6 +54,7 @@ flowchart TB
             volumePricingEngine["Tiered Volume Pricing Engine<br/><i>[Domain Service]</i><br/>Evaluates quantity breaks & MOQs"]
             reconciliationService["Stock Reconciliation Service<br/><i>[Domain Service]</i><br/>Absorbs deficits into safety buffers"]
             demandForecastEngine["Stock Runway & Forecast Engine<br/><i>[Domain Service]</i><br/>Burn rate & runway calculation"]
+            markdownEngine["Dead-Stock Markdown Engine<br/><i>[Domain Service]</i><br/>Price elasticity & margin floor guard"]
         end
 
         subgraph infraLayer["4. Infrastructure Tier"]
@@ -73,16 +76,18 @@ flowchart TB
     commerceControllers --> reserveCmd & confirmOrderCmd
     inventoryControllers --> webhookCmd
     catalogControllers --> bulkCsvCmd & catalogQuery & pricingQuery
-    aiControllers --> parseAiPoCmd & forecastQuery
+    aiControllers --> parseAiPoCmd & forecastQuery & activateMarkdownCmd & deadStockQuery
 
     reserveCmd --> reservationEngine
     confirmOrderCmd --> reservationEngine
     pricingQuery --> volumePricingEngine
     webhookCmd --> reconciliationService
     forecastQuery --> demandForecastEngine
+    activateMarkdownCmd --> markdownEngine
 
     parseAiPoCmd --> aiVisionAdapter
     parseAiPoCmd --> dbContext
+    activateMarkdownCmd --> dbContext
     aiVisionAdapter --> llmApi
 
     reservationEngine --> redisLockService

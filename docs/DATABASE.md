@@ -66,6 +66,7 @@ flowchart LR
         direction TB
         AIPO[ai_po_parse_jobs]
         AIFC[ai_inventory_forecasts]
+        AIMD[ai_pricing_markdown_proposals]
     end
 
     T --> identityGroup
@@ -86,6 +87,7 @@ flowchart LR
     O --> OI
     SKU --> OI
     SKU --> AIFC
+    SKU --> AIMD
     O -.-> AIPO
 ```
 
@@ -369,6 +371,23 @@ erDiagram
         varchar risk_level
         varchar status
         text notes
+        timestamptz created_at
+    }
+
+    ai_pricing_markdown_proposals {
+        uuid id PK
+        uuid tenant_id FK
+        uuid sku_id FK
+        integer days_in_inventory
+        numeric velocity_drop_percentage
+        numeric current_retail_price
+        numeric proposed_markdown_price
+        numeric proposed_discount_percentage
+        varchar campaign_type
+        varchar status
+        timestamptz expires_at
+        timestamptz activated_at
+        uuid activated_by FK
         timestamptz created_at
     }
 ```

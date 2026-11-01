@@ -960,6 +960,85 @@ paths:
         '404':
           $ref: '#/components/responses/ProblemNotFound'
 
+  /pricing/ai-markdown-proposals:
+    get:
+      tags: [AI Automation]
+      summary: "Autonomous Dead-Stock Liquidation Proposals (UC21)"
+      description: Returns AI-detected stagnant inventory (>30 days) with optimal markdown pricing and campaign recommendations to recover capital.
+      security:
+        - BearerAuth: []
+        - TenantIdHeader: []
+      parameters:
+        - name: campaignType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ALL, FLASH_SALE, B2B_CLEARANCE_TIER, BUNDLE_PROMO]
+            default: ALL
+      responses:
+        '200':
+          description: List of autonomous dead-stock liquidation proposals
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AiMarkdownProposalDto'
+                  summary:
+                    type: object
+                    properties:
+                      totalStagnantSkus:
+                        type: integer
+                      totalLockedCapital:
+                        type: number
+                      projectedCapitalRecovery:
+                        type: number
+        '401':
+          $ref: '#/components/responses/ProblemUnauthorized'
+        '403':
+          $ref: '#/components/responses/ProblemForbidden'
+
+  /pricing/ai-markdown-proposals/{id}/activate:
+    post:
+      tags: [AI Automation]
+      summary: "Activate AI Markdown Campaign (UC21)"
+      description: Atomically activates a proposed markdown campaign across digital storefronts or B2B price tiers with an automated rollback timer.
+      security:
+        - BearerAuth: []
+        - TenantIdHeader: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [durationHours]
+              properties:
+                durationHours:
+                  type: integer
+                  example: 48
+                  description: Duration of the flash sale or clearance campaign in hours before automatic rollback.
+      responses:
+        '200':
+          description: Campaign activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivateMarkdownCampaignResponse'
+        '404':
+          $ref: '#/components/responses/ProblemNotFound'
+
 # ============================================================================
 # COMPONENTS & SCHEMAS
 # ============================================================================
@@ -1731,3 +1810,72 @@ components:
         forecastGeneratedAt:
           type: string
           format: date-time
+
+    AiMarkdownProposalDto:
+      type: object
+      required: [id, skuId, skuCode, productTitle, daysInInventory, velocityDropPercentage, currentRetailPrice, proposedMarkdownPrice, proposedDiscountPercentage, campaignType, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        skuId:
+          type: string
+          format: uuid
+        skuCode:
+          type: string
+          example: "SKU-TSHIRT-BLK-L"
+        productTitle:
+          type: string
+          example: "Classic Cotton T-Shirt - Black / L"
+        daysInInventory:
+          type: integer
+          example: 48
+        velocityDropPercentage:
+          type: number
+          example: 62.5
+        currentRetailPrice:
+          type: number
+          example: 35.00
+        proposedMarkdownPrice:
+          type: number
+          example: 24.50
+        proposedDiscountPercentage:
+          type: number
+          example: 30.0
+        campaignType:
+          type: string
+          enum: [FLASH_SALE, B2B_CLEARANCE_TIER, BUNDLE_PROMO]
+          example: FLASH_SALE
+        status:
+          type: string
+          enum: [PENDING_APPROVAL, ACTIVATED, DISMISSED]
+          example: PENDING_APPROVAL
+        createdAt:
+          type: string
+          format: date-time
+
+    ActivateMarkdownCampaignResponse:
+      type: object
+      required: [proposalId, skuCode, campaignType, activeMarkdownPrice, expiresAt, status]
+      properties:
+        proposalId:
+          type: string
+          format: uuid
+        skuCode:
+          type: string
+          example: "SKU-TSHIRT-BLK-L"
+        campaignType:
+          type: string
+          example: FLASH_SALE
+        activeMarkdownPrice:
+          type: number
+          example: 24.50
+        discountPercentage:
+          type: number
+          example: 30.0
+        expiresAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          example: ACTIVATED

@@ -43,6 +43,7 @@ Each requirement is structured to be small enough to implement, review, and test
 | **US18** | As a Tenant Owner, I want to customize storefront branding and register outbound webhook endpoints so that external applications receive order lifecycle events. | Extensibility & branding | US02 | AC-UC07 |
 | **US19** | As a B2B Buyer or Sales Rep, I want an AI-powered purchase order parser so that I can upload handwritten notes, PO PDFs, or raw message text and automatically generate a validated draft order with matched SKUs and volume pricing in seconds. | B2B ordering automation & zero-friction intake | US02, US04, US11 | AC-UC19 |
 | **US20** | As a Warehouse Operator or Tenant Owner, I want an autonomous AI inventory copilot so that stockout runways are forecasted continuously and restock PO recommendations are generated automatically before critical stock depletion occurs. | Autonomous supply chain & stockout prevention | US07, US09 | AC-UC20 |
+| **US21** | As a Tenant Owner or Merchandising Director, I want an autonomous Revenue & Markdown AI agent so that slow-moving dead stock is detected proactively and optimal markdown / flash sale pricing strategies are proposed automatically to unlock working capital. | Dead-stock liquidation & capital velocity optimization | US04, US07, US11 | AC-UC21 |
 
 ---
 
@@ -72,6 +73,7 @@ Each requirement is structured to be small enough to implement, review, and test
 | **US18** | PASS | PASS | PASS | PASS | PASS | PASS | Outbound webhook dispatcher implements exponential backoff retry (3 attempts) with dead-letter logging upon repeated failure. |
 | **US19** | PASS | PASS | PASS | PASS | PASS | PASS | Multimodal Vision + LLM pipeline extracts line items from images/PDFs. Fuzzy/vector matches against tenant SKUs; flags low-confidence items (<80%) for human confirmation. |
 | **US20** | PASS | PASS | PASS | PASS | PASS | PASS | Scheduled analytics worker calculates rolling 30-day velocity. Predicts depletion dates and generates auto-draft replenishment POs with configurable lead time. |
+| **US21** | PASS | PASS | PASS | PASS | PASS | PASS | Autonomous Revenue Agent identifies stagnant inventory (>30 days, velocity drop >50%). Calculates price elasticity, suggests clearance discounts, and provides one-click flash sale deployment. |
 
 ---
 

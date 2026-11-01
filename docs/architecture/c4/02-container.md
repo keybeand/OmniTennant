@@ -25,7 +25,7 @@ flowchart TB
         subgraph apiTier["Application & Routing Tier"]
             apiGateway["<b>API Gateway & Reverse Proxy</b><br/><i>[Container: Nginx / YARP]</i><br/>Tenant domain resolution, SSL termination,<br/>rate-limiting, request routing"]
             backendApp["<b>OmniTenant Backend API</b><br/><i>[Container: ASP.NET Core 9.0 Web API]</i><br/>Multi-tenant middleware, CQRS application logic,<br/>two-phase reservation, audit & idempotency"]
-            aiWorker["<b>Autonomous AI Worker</b><br/><i>[Container: .NET 9 BackgroundService]</i><br/>Async PO document parsing, 30-day sales velocity,<br/>predictive stockout & auto-replenishment"]
+            aiWorker["<b>Autonomous Tri-Agent Worker</b><br/><i>[Container: .NET 9 BackgroundService]</i><br/>Sales Ops PO parsing, Procurement runway forecasting,<br/>Revenue dead-stock markdown optimization"]
         end
 
         subgraph storageTier["Persistence & In-Memory Tier"]
@@ -81,7 +81,7 @@ flowchart TB
 | **Admin Backoffice** | React 19, TypeScript, Vite | Operational dashboard for Tenant Owners and Warehouse Operators. High-density data grids, SKU variant drawer, allocation matrix, and AI Copilot recommendations. |
 | **API Gateway / Proxy** | Nginx / YARP (C#) | Ingress router. Extracts subdomain or custom CNAME (`{tenant-slug}.omnitenant.com`), injects `X-Tenant-ID`, terminates TLS, and enforces rate limits. |
 | **OmniTenant Backend API** | ASP.NET Core 9.0 (.NET 9) | Core business engine implementing Clean Architecture. Validates tokens, coordinates Two-Phase Stock Reservation, evaluates volume pricing, and logs audits. |
-| **Autonomous AI Worker** | .NET 9 BackgroundService | Asynchronous job consumer. Orchestrates PO document processing, calculates rolling stock consumption runways, and raises predictive replenishment alerts. |
+| **Autonomous Tri-Agent Worker** | .NET 9 BackgroundService | Asynchronous job consumer orchestrating 3 intelligent agents: Sales Ops PO parsing, Procurement runway forecasting, and Revenue dead-stock markdown optimization. |
 | **Redis Cache & Lock** | Redis 7.2 | In-memory distributed lock manager (`Redlock`), ephemeral 15-minute reservation hold store, Redis Streams job queue, and 24-hour `Idempotency-Key` replay cache. |
 | **PostgreSQL Database** | PostgreSQL 16 | Primary ACID relational database. Enforces tenant data segregation via native Row-Level Security (`app.current_tenant_id`), catalogs, orders, and AI forecast logs. |
 | **Object Storage** | S3 / MinIO | Scalable object storage for product images, uploaded bulk CSV batches, uploaded PO document scans, and rendered PDF tax invoices. |

@@ -358,6 +358,24 @@ CREATE TABLE ai_inventory_forecasts (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE ai_pricing_markdown_proposals (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    sku_id UUID NOT NULL REFERENCES skus(id) ON DELETE CASCADE,
+    days_in_inventory INT NOT NULL DEFAULT 30,
+    velocity_drop_percentage NUMERIC(5, 2) NOT NULL DEFAULT 0.00,
+    current_retail_price NUMERIC(12, 2) NOT NULL,
+    proposed_markdown_price NUMERIC(12, 2) NOT NULL,
+    proposed_discount_percentage NUMERIC(5, 2) NOT NULL,
+    campaign_type VARCHAR(30) NOT NULL DEFAULT 'FLASH_SALE' CHECK (campaign_type IN ('FLASH_SALE', 'B2B_CLEARANCE_TIER', 'BUNDLE_PROMO')),
+    status VARCHAR(30) NOT NULL DEFAULT 'PENDING_APPROVAL' CHECK (status IN ('PENDING_APPROVAL', 'ACTIVATED', 'DISMISSED')),
+    expires_at TIMESTAMPTZ,
+    activated_at TIMESTAMPTZ,
+    activated_by UUID REFERENCES app_users(id) ON DELETE SET NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ============================================================================
 -- 9. INDEXES FOR HIGH-CONCURRENCY PERFORMANCE
 -- ============================================================================
@@ -371,6 +389,7 @@ CREATE INDEX idx_orders_tenant_status ON orders(tenant_id, status, created_at DE
 CREATE INDEX idx_audit_logs_lookup ON audit_logs(tenant_id, entity_type, entity_id, created_at DESC);
 CREATE INDEX idx_ai_po_jobs_tenant ON ai_po_parse_jobs(tenant_id, status, created_at DESC);
 CREATE INDEX idx_ai_forecast_tenant_sku ON ai_inventory_forecasts(tenant_id, sku_id, risk_level);
+CREATE INDEX idx_ai_markdown_tenant_sku ON ai_pricing_markdown_proposals(tenant_id, sku_id, status);
 
 -- ============================================================================
 -- 10. ROW-LEVEL SECURITY (RLS) POLICIES
@@ -410,6 +429,7 @@ ALTER TABLE webhook_endpoints ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_po_parse_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_inventory_forecasts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE ai_pricing_markdown_proposals ENABLE ROW LEVEL SECURITY;
 
 -- Apply standard tenant isolation policy to all tables
 DO $$
@@ -421,7 +441,7 @@ DECLARE
         'warehouses', 'inventory_physical_stock', 'inventory_channel_allocations',
         'inventory_reservations', 'inventory_sync_conflicts', 'orders',
         'order_items', 'b2b_bulk_order_batches', 'webhook_endpoints', 'audit_logs',
-        'ai_po_parse_jobs', 'ai_inventory_forecasts'
+        'ai_po_parse_jobs', 'ai_inventory_forecasts', 'ai_pricing_markdown_proposals'
     ];
 BEGIN
     FOREACH tbl IN ARRAY tenant_tables LOOP
