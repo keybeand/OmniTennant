@@ -179,22 +179,46 @@ Detailed screen IDs, task flows, permissions, UI/UX state contracts, and API map
 
 Complete wireframe blueprints, design system tokens, split-screen layouts, and interaction flows are documented in [UI/UX Design Specification & Wireframe Blueprints](docs/09-ui-ux-design-specification.md) and the live interactive HTML prototype at [`docs/ui/index.html`](docs/ui/index.html).
 
-### 2.1 Visual UI/UX Mockups (P0 Killer & P1 Core Screens)
+### 2.3 Current UI Prototype (Role-Based Screen Inventory)
 
-#### `SCR-65` — AI Snap-to-Order Studio (Agent 1: Split-Screen OCR & Top-3 SKU Matcher)
-![SCR-65 AI Snap-to-Order Studio UI](docs/images/ui-snap-to-order.png)
+Role-based screenshots are organized under `docs/images/` by actor boundary (`chung/`, `tenant-owner/`, `warehouse-operator/`, `storefront/`), and can be interactively explored via [`docs/ui/index.html`](docs/ui/index.html).
 
-#### `SCR-66` — AI Inventory Procurement Copilot & Runway Hub (Agent 2: Depletion Forecast & Auto-PO Drawer)
-![SCR-66 AI Inventory Procurement Copilot UI](docs/images/ui-procurement-copilot.png)
+#### Common Authentication & Role Switcher (`SCR-01` & `SCR-02`)
+![Universal Login and Demo Role Switcher](docs/images/chung/01-login-role-switcher.png)
 
-#### `SCR-67` — AI Dynamic Markdown & Liquidation Console (Agent 3: Elasticity Simulator with $\ge 10\%$ Margin Guardrail)
-![SCR-67 AI Dynamic Markdown Console UI](docs/images/ui-dynamic-markdown.png)
+#### Role 1: Tenant Owner — Full Backoffice & Tri-Agent Autonomous Hub (`/admin`)
 
-#### `SCR-103` — High-Concurrency Storefront Checkout (Two-Phase 15-Minute Redlock Reservation Hold)
-![SCR-103 High-Concurrency Checkout Hold UI](docs/images/ui-checkout-hold.png)
+##### Executive Omnichannel & AI Telemetry Dashboard (`SCR-10`)
+![Tenant Owner Dashboard](docs/images/tenant-owner/01-dashboard.png)
 
-#### `SCR-30` — Omnichannel Inventory Allocation Matrix & Standardized RFC 7807 Observability
-![SCR-30 Omnichannel Allocation & RFC 7807 UI](docs/images/ui-inventory-allocation.png)
+##### Agent 1 — AI Snap-to-Order Studio (`SCR-65`: Split-Screen OCR & Top-3 SKU Matcher)
+![SCR-65 AI Snap-to-Order Studio UI](docs/images/tenant-owner/02-ai-snap-to-order.png)
+
+##### Agent 2 — AI Inventory Procurement Copilot (`SCR-66`: Runway Forecast & Auto-PO Drawer)
+![SCR-66 AI Inventory Procurement Copilot UI](docs/images/tenant-owner/03-ai-procurement-copilot.png)
+
+##### Agent 3 — AI Dynamic Markdown Console (`SCR-67`: Elasticity Simulator & $\ge 10\%$ Margin Guardrail)
+![SCR-67 AI Dynamic Markdown Console UI](docs/images/tenant-owner/04-ai-dynamic-markdown.png)
+
+##### B2B Tiered Volume Pricing & Over-Limit Credit Approval Modal (`SCR-40` & `SCR-52`)
+![SCR-40 and SCR-52 B2B Pricing and Credit Approval](docs/images/tenant-owner/05-b2b-pricing-credit.png)
+
+#### Role 2: Warehouse Operator — RBAC-Restricted WMS Workspace (`/admin`)
+*(Unauthorized menus such as Dynamic Markdowns, B2B Pricing, and Staff RBAC are automatically hidden from the sidebar).*
+
+##### Omnichannel Stock Allocation Matrix & Rebalance Modal (`SCR-30`, `SCR-31`, `SCR-32`)
+![Warehouse Operator Omnichannel Allocation](docs/images/warehouse-operator/01-omnichannel-allocation.png)
+
+##### External WMS Sync Conflict Queue & RFC 7807 ProblemDetails Log (`SCR-33`)
+![Warehouse Operator Sync Conflict Queue](docs/images/warehouse-operator/02-sync-conflict-queue.png)
+
+#### Roles 3 & 4: B2B Wholesale Buyer & B2C Shopper — Isolated Storefront Web App (`/{tenant-slug}`)
+
+##### B2B Bulk CSV/Excel Order Upload & Tiered Pricing Preview (`SCR-104`)
+![B2B Bulk Order Portal](docs/images/storefront/01-b2b-bulk-order-portal.png)
+
+##### High-Concurrency Checkout & 15-Minute Redlock Reservation Hold (`SCR-103`)
+![High-Concurrency Checkout Hold](docs/images/storefront/02-checkout-15m-hold.png)
 
 ## 3. C4 Architecture
 

@@ -79,6 +79,27 @@ The visual language balances **Enterprise Stability** (deep slates and cool neut
 
 > **Interactive Prototype Available:** Open [`docs/ui/index.html`](ui/index.html) in any browser to interact live with the Split-Screen OCR Reviewer, Runway Copilot, Dynamic Markdown 10% Margin Guardrail Slider, and 15-Minute Checkout Countdown Timer.
 
+### 3.0 Role-Based Screenshot Inventory (Organized by Actor)
+
+Following the standard repository convention (`docs/images/<role>/`), screenshots are partitioned by role to demonstrate strict RBAC sidebar filtering and portal separation:
+
+- **`docs/images/chung/`**: Universal Authentication & Demo Role Quick-Select (`SCR-01`, `SCR-02`)
+- **`docs/images/tenant-owner/`**: Full Backoffice & Tri-Agent Hub (`SCR-10`, `SCR-40`, `SCR-52`, `SCR-65`, `SCR-66`, `SCR-67`)
+- **`docs/images/warehouse-operator/`**: RBAC-Restricted WMS Workspace where Pricing, Markdowns, and Staff menus are hidden (`SCR-30`, `SCR-31`, `SCR-32`, `SCR-33`)
+- **`docs/images/storefront/`**: Isolated Customer & B2B Storefront Web Application (`SCR-100`, `SCR-103`, `SCR-104`)
+
+#### `SCR-01` & `SCR-02` — Universal Sign-In & Demo Role Switcher (`docs/images/chung/01-login-role-switcher.png`)
+![Universal Login and Demo Role Switcher](images/chung/01-login-role-switcher.png)
+
+#### `SCR-10` — Tenant Owner Executive Omnichannel & AI Dashboard (`docs/images/tenant-owner/01-dashboard.png`)
+![Tenant Owner Dashboard](images/tenant-owner/01-dashboard.png)
+
+#### `SCR-40` & `SCR-52` — Tenant Owner B2B Tiered Pricing & Credit Limit Approval Modal (`docs/images/tenant-owner/05-b2b-pricing-credit.png`)
+![B2B Pricing and Credit Approval Modal](images/tenant-owner/05-b2b-pricing-credit.png)
+
+#### `SCR-104` — Storefront B2B Wholesale Bulk CSV Order Portal (`docs/images/storefront/01-b2b-bulk-order-portal.png`)
+![B2B Bulk Order Portal](images/storefront/01-b2b-bulk-order-portal.png)
+
 ### 3.1 `SCR-65` AI Snap-to-Order Studio (Agent 1 / US19 / P0 Killer)
 
 The **AI Snap-to-Order Studio** utilizes an **Interactive Split-Screen Architecture**. Sales operators ingest raw customer documents (handwritten slips, whiteboard photos, WhatsApp/Zalo chats) on the left pane and verify extracted draft lines on the right pane in under 3 seconds.
