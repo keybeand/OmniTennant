@@ -177,7 +177,24 @@ flowchart TD
 
 Detailed screen IDs, task flows, permissions, UI/UX state contracts, and API mappings are maintained in [Information Architecture & Screen Hierarchy](docs/04-information-architecture.md).
 
-Complete wireframe blueprints, design system tokens, split-screen layouts, and interaction flows are documented in [UI/UX Design Specification & Wireframe Blueprints](docs/09-ui-ux-design-specification.md).
+Complete wireframe blueprints, design system tokens, split-screen layouts, and interaction flows are documented in [UI/UX Design Specification & Wireframe Blueprints](docs/09-ui-ux-design-specification.md) and the live interactive HTML prototype at [`docs/ui/index.html`](docs/ui/index.html).
+
+### 2.1 Visual UI/UX Mockups (P0 Killer & P1 Core Screens)
+
+#### `SCR-65` — AI Snap-to-Order Studio (Agent 1: Split-Screen OCR & Top-3 SKU Matcher)
+![SCR-65 AI Snap-to-Order Studio UI](docs/images/ui-snap-to-order.png)
+
+#### `SCR-66` — AI Inventory Procurement Copilot & Runway Hub (Agent 2: Depletion Forecast & Auto-PO Drawer)
+![SCR-66 AI Inventory Procurement Copilot UI](docs/images/ui-procurement-copilot.png)
+
+#### `SCR-67` — AI Dynamic Markdown & Liquidation Console (Agent 3: Elasticity Simulator with $\ge 10\%$ Margin Guardrail)
+![SCR-67 AI Dynamic Markdown Console UI](docs/images/ui-dynamic-markdown.png)
+
+#### `SCR-103` — High-Concurrency Storefront Checkout (Two-Phase 15-Minute Redlock Reservation Hold)
+![SCR-103 High-Concurrency Checkout Hold UI](docs/images/ui-checkout-hold.png)
+
+#### `SCR-30` — Omnichannel Inventory Allocation Matrix & Standardized RFC 7807 Observability
+![SCR-30 Omnichannel Allocation & RFC 7807 UI](docs/images/ui-inventory-allocation.png)
 
 ## 3. C4 Architecture
 

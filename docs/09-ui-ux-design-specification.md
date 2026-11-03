@@ -75,11 +75,15 @@ The visual language balances **Enterprise Stability** (deep slates and cool neut
 
 ---
 
-## 3. High-Fidelity Screen Wireframe Blueprints
+## 3. Visual UI Mockups & High-Fidelity Screen Blueprints
+
+> **Interactive Prototype Available:** Open [`docs/ui/index.html`](ui/index.html) in any browser to interact live with the Split-Screen OCR Reviewer, Runway Copilot, Dynamic Markdown 10% Margin Guardrail Slider, and 15-Minute Checkout Countdown Timer.
 
 ### 3.1 `SCR-65` AI Snap-to-Order Studio (Agent 1 / US19 / P0 Killer)
 
 The **AI Snap-to-Order Studio** utilizes an **Interactive Split-Screen Architecture**. Sales operators ingest raw customer documents (handwritten slips, whiteboard photos, WhatsApp/Zalo chats) on the left pane and verify extracted draft lines on the right pane in under 3 seconds.
+
+![SCR-65 AI Snap-to-Order Studio UI Mockup](images/ui-snap-to-order.png)
 
 ```text
 +-------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -121,6 +125,8 @@ The **AI Snap-to-Order Studio** utilizes an **Interactive Split-Screen Architect
 
 The **Procurement Copilot Console** tracks SKU depletion velocity over a rolling 30-day window, dynamically calculates **Runway Days** ($\frac{\text{AvailableStock}}{\text{DailyBurnRate}}$), and automatically prepares vendor Purchase Orders before stockout horizons are breached.
 
+![SCR-66 AI Inventory Procurement Copilot UI Mockup](images/ui-procurement-copilot.png)
+
 ```text
 +-------------------------------------------------------------------------------------------------------------------------------------------------------+
 |  OmniTenant Backoffice  |  Catalog  |  Inventory  |  Orders  | [ AI Operations v ] |  Settings                                [ Tenant: Nike-VN v ] [Admin]|
@@ -158,6 +164,8 @@ The **Procurement Copilot Console** tracks SKU depletion velocity over a rolling
 ### 3.3 `SCR-67` AI Dynamic Markdown & Dead-Stock Liquidation Console (Agent 3 / US21 / P0 Killer)
 
 The **Dynamic Markdown Console** algorithmically discovers trapped working capital in stagnant SKUs ($>30$ days untouched, $>50\%$ velocity drop) and formulates flash sales while strictly enforcing an algorithmic **Gross Margin Floor $\ge 10\%$**.
+
+![SCR-67 AI Dynamic Markdown Console UI Mockup](images/ui-dynamic-markdown.png)
 
 ```text
 +-------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -202,6 +210,8 @@ The **Dynamic Markdown Console** algorithmically discovers trapped working capit
 
 During viral flash sales, customers must have confidence that their inventory is reserved while they type credit card numbers. The **Two-Phase Reservation UI** features a persistent sticky countdown banner and real-time state feedback.
 
+![SCR-103 High-Concurrency Checkout 15-Minute Hold UI Mockup](images/ui-checkout-hold.png)
+
 ```text
 +-------------------------------------------------------------------------------------------------------------------------------------------------------+
 |  NIKE VIETNAM OFFICIAL STOREFRONT                                                          [ 🔍 Search products... ]   [ Cart (2) ]  [ User Account ] |
@@ -238,6 +248,8 @@ During viral flash sales, customers must have confidence that their inventory is
 ### 3.5 `SCR-30` Omnichannel Inventory Allocation Matrix (WMS / US07, US15 / P1 Core)
 
 The **Inventory Allocation Matrix** prevents overselling across channels (Online B2C, Wholesale B2B, Retail Stores) and provides visual indicators when synchronization discrepancies occur.
+
+![SCR-30 Omnichannel Inventory Allocation & RFC 7807 UI Mockup](images/ui-inventory-allocation.png)
 
 ```text
 +-------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -367,3 +379,4 @@ sequenceDiagram
 ---
 
 *This specification is maintained under configuration management and maps 1:1 with backend entities defined in `src/database/schema.sql` and API contracts in `docs/api/openapi.yaml`.*
+

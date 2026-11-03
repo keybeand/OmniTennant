@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniTenant — Interactive UI/UX Prototype & Visual Design System</title>
+  <style>
+    :root {
+      --bg-app: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-sidebar: #0f172a;
+      --bg-sidebar-hover: #1e293b;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --ai-accent: #7c3aed;
+      --ai-light: #f5f3ff;
+      --ai-border: #ddd6fe;
+      --emerald: #059669;
+      --emerald-bg: #ecfdf5;
+      --emerald-border: #a7f3d0;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --amber-border: #fde68a;
+      --crimson: #dc2626;
+      --crimson-bg: #fef2f2;
+      --crimson-border: #fecaca;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Prototype Switcher Bar */
+    .proto-bar {
+      background: linear-gradient(90deg, #090d16 0%, #1e1b4b 100%);
+      color: #fff;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #312e81;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .proto-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .proto-badge {
+      background: var(--ai-accent);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .proto-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .proto-tab {
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .proto-tab:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #fff;
+    }
+
+    .proto-tab.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: #60a5fa;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
+    }
+
+    /* Main Application Shell */
+    .app-layout {
+      display: flex;
+      flex: 1;
+      min-height: calc(100vh - 49px);
+    }
+
+    .sidebar {
+      width: 240px;
+      background: var(--bg-sidebar);
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-logo {
+      color: #fff;
+      font-weight: 800;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #38bdf8;
+      box-shadow: 0 0 8px #38bdf8;
+    }
+
+    .tenant-pill {
+      background: #1e293b;
+      color: #e2e8f0;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #334155;
+      font-family: var(--font-mono);
+    }
+
+    .nav-section {
+      padding: 14px 16px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #475569;
+    }
+
+    .nav-item {
+      padding: 9px 16px;
+      margin: 2px 8px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      color: #cbd5e1;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-sidebar-hover);
+      color: #fff;
+    }
+
+    .nav-item.active {
+      background: #1e293b;
+      color: #fff;
+      border-left: 3px solid var(--ai-accent);
+    }
+
+    .nav-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      background: rgba(124, 58, 237, 0.25);
+      color: #c4b5fd;
+    }
+
+    .main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Header */
+    .topbar {
+      background: #fff;
+      height: 58px;
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .breadcrumb {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .breadcrumb strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rls-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: #334155;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+    }
+
+    /* Screen Container */
+    .screen {
+      display: none;
+      padding: 24px;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    .screen-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .screen-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .screen-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Cards & Grids */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      margin: 6px 0 4px;
+      font-family: var(--font-mono);
+      color: var(--text-main);
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Pills & Badges */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .pill-success {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid var(--emerald-border);
+    }
+
+    .pill-warning {
+      background: var(--amber-bg);
+      color: var(--amber);
+      border: 1px solid var(--amber-border);
+    }
+
+    .pill-danger {
+      background: var(--crimson-bg);
+      color: var(--crimson);
+      border: 1px solid var(--crimson-border);
+    }
+
+    .pill-ai {
+      background: var(--ai-light);
+      color: var(--ai-accent);
+      border: 1px solid var(--ai-border);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-ai {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+
+    .btn-outline:hover {
+      background: #f8fafc;
+    }
+
+    /* Split Screen Layout for SCR-65 */
+    .split-view {
+      display: grid;
+      grid-template-columns: 44% 56%;
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Handwritten Receipt Simulation */
+    .receipt-canvas {
+      background: #cbd5e1;
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .paper-note {
+      background: #fefce8;
+      background-image: repeating-linear-gradient(#fefce8 0px, #fefce8 27px, #e2e8f0 28px);
+      width: 100%;
+      max-width: 460px;
+      border-radius: 6px;
+      padding: 22px 20px;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15);
+      border: 1px solid #fde047;
+      font-family: 'Comic Sans MS', 'Bradley Hand', cursive, sans-serif;
+      color: #1e293b;
+    }
+
+    .paper-header {
+      font-size: 14px;
+      font-weight: 700;
+      color: #475569;
+      margin-bottom: 12px;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bbox {
+      padding: 7px 10px;
+      margin: 8px 0;
+      border-radius: 5px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .bbox-ok {
+      border: 2px solid #10b981;
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .bbox-warn {
+      border: 2px dashed #f59e0b;
+      background: rgba(245, 158, 11, 0.16);
+      transform: scale(1.03);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    }
+
+    .bbox-tag {
+      position: absolute;
+      top: -10px;
+      right: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      color: #fff;
+    }
+
+    .bbox-ok .bbox-tag {
+      background: #059669;
+    }
+
+    .bbox-warn .bbox-tag {
+      background: #d97706;
+    }
+
+    /* Tables */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 10px 14px;
+      background: #f8fafc;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .row-highlight-warn {
+      background: #fffbeb;
+    }
+
+    .candidate-select {
+      width: 100%;
+      padding: 6px 8px;
+      border: 2px solid #f59e0b;
+      border-radius: 6px;
+      background: #fff;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .sku-code {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 12px;
+      color: #1e293b;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* Footer Summary Box */
+    .order-footer {
+      padding: 16px;
+      background: #f8fafc;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    /* Drawer / Modal Simulation Card */
+    .drawer-box {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+      border: 2px solid var(--ai-accent);
+      border-radius: 10px;
+      padding: 18px 20px;
+      box-shadow: 0 10px 25px rgba(124, 58, 237, 0.12);
+    }
+
+    /* Slider simulator */
+    .sim-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+    }
+
+    .slider-input {
+      width: 100%;
+      accent-color: var(--ai-accent);
+      height: 8px;
+      cursor: pointer;
+      margin: 12px 0;
+    }
+
+    /* Storefront Checkout Banner */
+    .hold-banner {
+      background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 100%);
+      color: #fff;
+      padding: 14px 20px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    }
+
+    .timer-box {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 800;
+      background: rgba(255, 255, 255, 0.18);
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      letter-spacing: 0.05em;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+    }
+
+    .rfc-box {
+      background: #1e293b;
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      border-left: 4px solid #ef4444;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP PROTOTYPE SWITCHER -->
+  <div class="proto-bar">
+    <div class="proto-brand">
+      <span>⚡ OmniTenant Interactive UI/UX Prototype</span>
+      <span class="proto-badge">V1 Architecture Blueprint</span>
+    </div>
+    <div class="proto-tabs">
+      <button class="proto-tab active" onclick="showScreen(1)" id="tab-1">1. SCR-65: AI Snap-to-Order (Agent 1)</button>
+      <button class="proto-tab" onclick="showScreen(2)" id="tab-2">2. SCR-66: Procurement Copilot (Agent 2)</button>
+      <button class="proto-tab" onclick="showScreen(3)" id="tab-3">3. SCR-67: Dynamic Markdown (Agent 3)</button>
+      <button class="proto-tab" onclick="showScreen(4)" id="tab-4">4. SCR-103: 15-Min Hold Checkout</button>
+      <button class="proto-tab" onclick="showScreen(5)" id="tab-5">5. SCR-30: Omnichannel Allocation & RFC 7807</button>
+    </div>
+  </div>
+
+  <!-- MAIN APPLICATION SHELL -->
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <span class="logo-dot"></span>
+          OmniTenant OS
+        </div>
+        <span class="tenant-pill">NIKE-VN</span>
+      </div>
+
+      <div class="nav-section">Core Operations</div>
+      <div class="nav-item" onclick="showScreen(5)">📦 Omnichannel WMS</div>
+      <div class="nav-item" onclick="showScreen(4)">🛒 Storefront Checkout</div>
+
+      <div class="nav-section">Tri-Agent AI Engine (P0)</div>
+      <div class="nav-item active" id="nav-1" onclick="showScreen(1)">
+        <span>📸 Snap-to-Order</span>
+        <span class="nav-tag">Agent 1</span>
+      </div>
+      <div class="nav-item" id="nav-2" onclick="showScreen(2)">
+        <span>📈 Runway Copilot</span>
+        <span class="nav-tag">Agent 2</span>
+      </div>
+      <div class="nav-item" id="nav-3" onclick="showScreen(3)">
+        <span>🏷️ Dead-Stock Markdown</span>
+        <span class="nav-tag">Agent 3</span>
+      </div>
+
+      <div class="nav-section">Tenant Security</div>
+      <div class="nav-item">🔒 PostgreSQL RLS (21)</div>
+      <div class="nav-item">🛡️ Audit Trail Logs</div>
+    </aside>
+
+    <!-- CONTENT AREA -->
+    <div class="main-area">
+      <header class="topbar">
+        <div class="breadcrumb" id="breadcrumb-text">
+          Tenant Backoffice &nbsp;/&nbsp; AI Autonomous Hub &nbsp;/&nbsp; <strong>SCR-65: AI Snap-to-Order Studio</strong>
+        </div>
+        <div class="topbar-right">
+          <div class="rls-indicator">
+            <span class="status-dot"></span>
+            <span>RLS Context: app.current_tenant_id = '9b1deb4d-3b7d'</span>
+          </div>
+          <span class="pill pill-ai">⚡ Tri-Agent Engine Active</span>
+        </div>
+      </header>
+
+      <!-- ================================================================= -->
+      <!-- SCREEN 1: SCR-65 AI SNAP-TO-ORDER STUDIO (AGENT 1)                -->
+      <!-- ================================================================= -->
+      <section class="screen active" id="screen-1">
+        <div class="screen-header">
+          <div>
+            <div class="screen-title">
+              SCR-65: AI Snap-to-Order Studio
+              <span class="pill pill-ai">Agent 1 • Multimodal Vision + Trigram Matcher</span>
+              <span class="pill pill-warning" id="header-review-badge">🟡 1 Line Requires Human Verification (&lt;80%)</span>
+            </div>
+            <div class="screen-subtitle">
+              Side-by-side Management-by-Exception interface: Auto-zooms to low-confidence handwritten regions and suggests Top-3 tenant SKUs.
+            </div>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline">📂 Upload Invoice / Chat Slip</button>
+            <button class="btn btn-ai" onclick="approveOrder()">⚡ 1-Click Approve B2B Order (22,491,000 ₫)</button>
+          </div>
+        </div>
+
+        <div class="split-view">
+          <!-- LEFT PANE: SOURCE ARTIFACT WITH BOUNDING BOXES -->
+          <div class="panel">
+            <div class="panel-header">
+              <span>📄 Source Artifact: <code>zalo_wholesale_slip_098.jpg</code></span>
+              <span class="pill pill-success">OCR Latency: 2.4s</span>
+            </div>
+            <div class="receipt-canvas">
+              <div class="paper-note">
+                <div class="paper-header">
+                  <span>ĐƠN ĐẶT HÀNG SỈ (ZALO / VIẾT TAY)</span>
+                  <span>Ngày: 02/11/2026</span>
+                </div>
+                <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
+                  Khách sỉ: Công ty May Mặc Sài Gòn (Tier 2 - Chiết khấu 15%)
+                </p>
+
+                <div class="bbox bbox-ok">
+                  <span class="bbox-tag">BOX #1 • 94% MATCH</span>
+                  1. Áo polo đen form rộng sz bự — <strong>SL: 20 cái</strong>
+                </div>
+
+                <div class="bbox bbox-ok">
+                  <span class="bbox-tag">BOX #2 • 91% MATCH</span>
+                  2. Sơ mi trắng cổ tàu vải mịn sz L — <strong>SL: 15 cái</strong>
+                </div>
+
+                <div class="bbox bbox-warn" id="bbox-3">
+                  <span class="bbox-tag" id="bbox-3-tag">🔍 AUTO-ZOOM • 74% AMBIGUOUS</span>
+                  3. Quần tây âu xanh đen ống đứng 32 — <strong>SL: 10 cái</strong>
+                </div>
+
+                <div class="bbox bbox-ok">
+                  <span class="bbox-tag">BOX #4 • 96% MATCH</span>
+                  4. Vớ cổ ngắn xám tiêu kháng khuẩn — <strong>SL: 50 đôi</strong>
+                </div>
+              </div>
+              <div style="margin-top:14px; font-size:12px; color:#475569; font-weight:600;">
+                💡 Interactive UX: Clicking row #3 on the right automatically zooms &amp; highlights Bounding Box #3 above.
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT PANE: EXTRACTED B2B DRAFT ORDER GRID -->
+          <div class="panel">
+            <div class="panel-header">
+              <span>📋 Extracted B2B Draft Order <code>#PO-JOB-9842</code></span>
+              <span style="font-size:12px; color:#64748b;">Buyer: <strong>Saigon Garments Ltd</strong> (Tier 2 Wholesale -15%)</span>
+            </div>
+
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Raw OCR Text</th>
+                  <th>Normalized Tenant SKU (Top-3 Candidates)</th>
+                  <th>Confidence</th>
+                  <th>Qty</th>
+                  <th>Tier Price</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>01</td>
+                  <td><code>"Áo polo đen form rộng sz bự"</code></td>
+                  <td>
+                    <span class="sku-code">SKU-POLO-BLK-XXL</span>
+                    <div style="font-size:12px; color:#475569;">Classic Pique Polo Black - 2XL</div>
+                  </td>
+                  <td><span class="pill pill-success">🟢 94% Verified</span></td>
+                  <td><strong>20</strong></td>
+                  <td><strong>425,000 ₫</strong></td>
+                </tr>
+                <tr>
+                  <td>02</td>
+                  <td><code>"Sơ mi trắng cổ tàu sz L"</code></td>
+                  <td>
+                    <span class="sku-code">SKU-SHT-WHT-L</span>
+                    <div style="font-size:12px; color:#475569;">Mandarin Collar Oxford White - L</div>
+                  </td>
+                  <td><span class="pill pill-success">🟢 91% Verified</span></td>
+                  <td><strong>15</strong></td>
+                  <td><strong>510,000 ₫</strong></td>
+                </tr>
+                <tr class="row-highlight-warn" id="row-ambiguous">
+                  <td><strong>03</strong></td>
+                  <td><code>"Quần tây âu xanh đen 32"</code></td>
+                  <td>
+                    <select class="candidate-select" id="candidate-select" onchange="resolveAmbiguousRow()">
+                      <option value="1">⚡ [1] SKU-PNT-NVY-32 — Tailored Navy Trousers 32 (74%)</option>
+                      <option value="2">[2] SKU-PNT-BLK-32 — Tailored Jet Black Trousers 32 (64%)</option>
+                      <option value="3">[3] SKU-PNT-CHA-32 — Charcoal Slim Trousers 32 (48%)</option>
+                    </select>
+                    <div style="font-size:11px; color:#b45309; margin-top:4px;" id="row-hint">
+                      ⚠️ Below 80% threshold: Select Top-3 candidate or press [1-3] key to confirm.
+                    </div>
+                  </td>
+                  <td id="row-conf-cell"><span class="pill pill-warning">🟡 74% Review</span></td>
+                  <td><strong>10</strong></td>
+                  <td><strong>680,000 ₫</strong></td>
+                </tr>
+                <tr>
+                  <td>04</td>
+                  <td><code>"Vớ cổ ngắn xám tiêu"</code></td>
+                  <td>
+                    <span class="sku-code">SKU-SCK-GRY-FREE</span>
+                    <div style="font-size:12px; color:#475569;">Ankle Performance Socks Heather Grey</div>
+                  </td>
+                  <td><span class="pill pill-success">🟢 96% Verified</span></td>
+                  <td><strong>50</strong></td>
+                  <td><strong>38,000 ₫</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="order-footer">
+              <div>
+                <div style="font-size:12px; color:#64748b;">Volume Tier 2 Applied (-15% off MSRP) • Stock Available Across All Lines</div>
+                <div style="font-size:16px; font-weight:800; color:#0f172a; margin-top:2px;">
+                  Final B2B Net Total (incl. 8% VAT): <span style="color:var(--primary); font-family:var(--font-mono);">22,491,000 ₫</span>
+                </div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="btn btn-outline" onclick="resolveAmbiguousRow()">✅ Confirm Candidate #1</button>
+                <button class="btn btn-ai" onclick="approveOrder()">🚀 Generate Executable Order</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SCREEN 2: SCR-66 AI INVENTORY PROCUREMENT COPILOT (AGENT 2)       -->
+      <!-- ================================================================= -->
+      <section class="screen" id="screen-2">
+        <div class="screen-header">
+          <div>
+            <div class="screen-title">
+              SCR-66: AI Inventory Procurement Copilot &amp; Runway Hub
+              <span class="pill pill-ai">Agent 2 • Stockout Runway Engine</span>
+            </div>
+            <div class="screen-subtitle">
+              Continuous 30-day burn-rate telemetry computing <code>Runway_Days = Available_Stock / Daily_Burn_Rate</code> and pre-drafting supplier POs.
+            </div>
+          </div>
+          <button class="btn btn-primary">🔄 Recalculate 30D Velocity</button>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Active SKUs Monitored</div>
+            <div class="kpi-value">1,420</div>
+            <div class="kpi-sub" style="color:var(--emerald);">🟢 98.2% Optimal Runway Health</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Imminent Stockout Risk (&lt;7d)</div>
+            <div class="kpi-value" style="color:var(--crimson);">2 SKUs</div>
+            <div class="kpi-sub" style="color:var(--crimson);">🔴 Runway &le; Supplier Lead Time</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Rolling 30-Day Velocity</div>
+            <div class="kpi-value">242.5 / day</div>
+            <div class="kpi-sub" style="color:var(--primary);">📈 +18.4% Demand Surge Detected</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Auto-Drafted Supplier POs</div>
+            <div class="kpi-value">54,000,000 ₫</div>
+            <div class="kpi-sub" style="color:var(--ai-accent);">⚡ Ready for 1-Click WMS Dispatch</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span>📊 Real-Time SKU Runway Forecast &amp; Replenishment Triggers</span>
+            <span class="pill pill-ai">Formula: Runway_Days = Available_Stock / Velocity_30D</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>SKU Code</th>
+                <th>Product Variant</th>
+                <th>Available Stock</th>
+                <th>30D Burn Rate</th>
+                <th>Forecast Runway</th>
+                <th>Supplier Lead Time</th>
+                <th>Copilot Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="background:#fef2f2;">
+                <td><span class="sku-code">SKU-POLO-BLK-XXL</span></td>
+                <td><strong>Classic Pique Polo Black - 2XL</strong></td>
+                <td><strong>42 units</strong></td>
+                <td>14.0 units/day</td>
+                <td><span class="pill pill-danger">🔴 3.0 Days Left</span></td>
+                <td>7 Days (VN-Textile Corp)</td>
+                <td><span class="pill pill-ai">⚡ Auto-PO #PO-2026-081 Ready</span></td>
+              </tr>
+              <tr style="background:#fffbeb;">
+                <td><span class="sku-code">SKU-SHT-WHT-L</span></td>
+                <td><strong>Mandarin Collar Oxford White - L</strong></td>
+                <td><strong>85 units</strong></td>
+                <td>12.1 units/day</td>
+                <td><span class="pill pill-warning">🟡 7.0 Days Left</span></td>
+                <td>7 Days (Hanoi Garment Co)</td>
+                <td><button class="btn btn-outline" style="padding:4px 10px; font-size:11px;">Prepare Draft PO</button></td>
+              </tr>
+              <tr>
+                <td><span class="sku-code">SKU-TSH-NVY-L</span></td>
+                <td>Slim Crewneck Tee Navy - L</td>
+                <td>310 units</td>
+                <td>15.5 units/day</td>
+                <td><span class="pill pill-success">🟢 20.0 Days Left</span></td>
+                <td>5 Days (VN-Textile Corp)</td>
+                <td><span style="font-size:12px; color:#64748b;">No action required</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PRE-POPULATED PURCHASE ORDER DRAWER -->
+        <div class="drawer-box">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <div>
+              <span class="pill pill-ai">🤖 AI COPILOT GENERATED REORDER PROPOSAL</span>
+              <h3 style="font-size:16px; margin-top:6px;">Supplier Purchase Order Draft <code>#PO-2026-081</code> — Vietnam Textile Group (VN-Tex)</h3>
+            </div>
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-outline">📥 Export PO PDF</button>
+              <button class="btn btn-ai">🚀 1-Click Dispatch PO to Supplier &amp; WMS</button>
+            </div>
+          </div>
+          <p style="font-size:13px; color:#334155;">
+            <strong>AI Replenishment Rationale:</strong> <code>SKU-POLO-BLK-XXL</code> has <strong>42 units</strong> remaining at a 30-day velocity of <strong>14.0 units/day</strong> (Runway = <strong>3.0 days</strong>). Because supplier lead time is 7 days, Copilot recommends ordering <strong>300 units</strong> (Unit Cost: 180,000 ₫ • Total: <strong>54,000,000 ₫</strong>) to cover lead-time deficit plus a 21-day safety cycle.
+          </p>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SCREEN 3: SCR-67 AI DYNAMIC MARKDOWN & LIQUIDATION (AGENT 3)      -->
+      <!-- ================================================================= -->
+      <section class="screen" id="screen-3">
+        <div class="screen-header">
+          <div>
+            <div class="screen-title">
+              SCR-67: AI Dynamic Markdown &amp; Dead-Stock Liquidation Console
+              <span class="pill pill-ai">Agent 3 • Elasticity Optimizer</span>
+            </div>
+            <div class="screen-subtitle">
+              Identifies stagnant inventory (&gt;30 days dormant, velocity drop &gt;50%) and simulates clearance campaigns while enforcing a hard <strong>Gross Margin Floor &ge; 10%</strong>.
+            </div>
+          </div>
+          <span class="pill" style="background:#0f172a; color:#fff; padding:6px 12px;">🔒 Hard Domain Rule: Gross Margin &ge; 10.0% Locked</span>
+        </div>
+
+        <div class="sim-grid">
+          <!-- LEFT: STAGNANT INVENTORY TABLE -->
+          <div class="panel">
+            <div class="panel-header">
+              <span>💤 Detected Dead-Stock SKUs (Dormant &gt; 30 Days)</span>
+              <span class="pill pill-warning">Trapped Capital: 143,150,000 ₫</span>
+            </div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>SKU</th>
+                  <th>Dormant</th>
+                  <th>Unit Cost (COGS)</th>
+                  <th>Current MSRP</th>
+                  <th>AI Suggested Price</th>
+                  <th>Projected Margin</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="background:#f5f3ff;">
+                  <td>
+                    <span class="sku-code">SKU-JKT-YEL-M</span>
+                    <div style="font-size:11px; color:#475569;">Puffer Jacket Mustard - M (145 units)</div>
+                  </td>
+                  <td><span class="pill pill-danger">46 Days</span></td>
+                  <td><strong>350,000 ₫</strong></td>
+                  <td><s>890,000 ₫</s></td>
+                  <td><strong style="color:var(--ai-accent);">499,000 ₫ (-44%)</strong></td>
+                  <td><span class="pill pill-success">🟢 29.9% (&ge;10%)</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="sku-code">SKU-PNT-GRY-32</span>
+                    <div style="font-size:11px; color:#475569;">Chino Trousers Grey - 32 (420 units)</div>
+                  </td>
+                  <td><span class="pill pill-warning">34 Days</span></td>
+                  <td><strong>220,000 ₫</strong></td>
+                  <td><s>550,000 ₫</s></td>
+                  <td><strong>275,000 ₫ (-50%)</strong></td>
+                  <td><span class="pill pill-success">🟢 20.0% (&ge;10%)</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- RIGHT: INTERACTIVE MARGIN FLOOR GUARDRAIL SIMULATOR -->
+          <div class="panel" style="padding:18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="font-size:15px;">🎛️ Interactive Price Elasticity &amp; Margin Guardrail Simulator</h3>
+              <span class="sku-code">SKU-JKT-YEL-M</span>
+            </div>
+            <p style="font-size:12px; color:#64748b; margin-top:4px;">
+              Drag the discount slider below to test the hard 10% Gross Margin guardrail:
+            </p>
+
+            <div style="margin:16px 0; padding:14px; background:#f8fafc; border-radius:8px; border:1px solid var(--border);">
+              <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:600;">
+                <span>Markdown Discount Depth: <strong id="sim-discount-label" style="color:var(--ai-accent);">-44%</strong></span>
+                <span>Clearance Price: <strong id="sim-price-label" style="font-family:var(--font-mono);">498,400 ₫</strong></span>
+              </div>
+              <input type="range" min="10" max="70" value="44" class="slider-input" id="markdown-slider" oninput="updateMarkdownSim()" />
+              <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+                <span>-10% (Mild)</span>
+                <span>AI Optimal (-44%)</span>
+                <span>-61% (10% Margin Floor Limit)</span>
+                <span>-70% (Blocked)</span>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
+              <div style="padding:10px; background:#f8fafc; border-radius:6px; border:1px solid var(--border);">
+                <div style="font-size:11px; color:#64748b;">Unit Cost (COGS)</div>
+                <div style="font-size:16px; font-weight:700; font-family:var(--font-mono);">350,000 ₫</div>
+              </div>
+              <div style="padding:10px; background:#f8fafc; border-radius:6px; border:1px solid var(--border);">
+                <div style="font-size:11px; color:#64748b;">Resulting Gross Margin</div>
+                <div style="font-size:16px; font-weight:700; font-family:var(--font-mono);" id="sim-margin-value">🟢 +29.8% (+148,400 ₫)</div>
+              </div>
+            </div>
+
+            <div id="guardrail-status" style="padding:10px 12px; border-radius:6px; background:var(--emerald-bg); border:1px solid var(--emerald-border); color:var(--emerald); font-size:12px; font-weight:600; margin-bottom:14px;">
+              ✅ GUARDRAIL PASSED: Gross Margin (29.8%) is safely above the 10.0% minimum floor. Auto-rollback scheduled in 72h.
+            </div>
+
+            <button class="btn btn-ai" id="deploy-markdown-btn" style="width:100%; justify-content:center;">
+              🚀 1-Click Launch 72h Flash Sale Campaign (Auto-Rollback Enabled)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SCREEN 4: SCR-103 TWO-PHASE CHECKOUT & 15-MIN HOLD                -->
+      <!-- ================================================================= -->
+      <section class="screen" id="screen-4">
+        <div class="hold-banner">
+          <div>
+            <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:#93c5fd;">
+              🔒 Phase 1 Distributed Inventory Reservation Active (Redis Redlock + PostgreSQL xmin)
+            </div>
+            <div style="font-size:16px; font-weight:700; margin-top:2px;">
+              Your stock is exclusively locked! Zero risk of overselling while you complete payment.
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px; color:#bfdbfe; margin-bottom:2px;">Reservation Expires In (TTL):</div>
+            <div class="timer-box" id="countdown-timer">14 : 42</div>
+          </div>
+        </div>
+
+        <div class="split-view" style="grid-template-columns: 58% 42%;">
+          <div class="panel" style="padding:20px; gap:14px;">
+            <h3 style="font-size:16px;">SCR-103: High-Concurrency Customer &amp; B2B Checkout</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#475569;">Full Name / Recipient</label>
+                <input type="text" value="Nguyen Van Minh" readonly style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; margin-top:4px;" />
+              </div>
+              <div>
+                <label style="font-size:12px; font-weight:600; color:#475569;">Phone Number</label>
+                <input type="text" value="0901 234 567" readonly style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; margin-top:4px;" />
+              </div>
+            </div>
+            <div>
+              <label style="font-size:12px; font-weight:600; color:#475569;">Shipping Address</label>
+              <input type="text" value="72 Le Loi Boulevard, Ben Nghe Ward, District 1, Ho Chi Minh City" readonly style="width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:6px; margin-top:4px;" />
+            </div>
+
+            <div style="padding:12px; background:#f8fafc; border-radius:8px; border:1px solid var(--border);">
+              <div style="font-size:12px; font-weight:700; color:#1e293b; margin-bottom:6px;">🛡️ Idempotency &amp; Concurrency Telemetry</div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:#475569;">
+                • Idempotency-Key Header: <strong>f47ac10b-58cc-4372-a567-0e02b2c3d479</strong> (24h Redis Replay Guard)<br/>
+                • Reservation Record ID: <strong>RSV-20261103-8821</strong> (Status: <code>HELD</code> • Lock Latency: <code>8.4ms</code>)
+              </div>
+            </div>
+
+            <button class="btn btn-primary" style="padding:12px; justify-content:center; font-size:14px;">
+              💳 Authorize Payment &amp; Execute Phase 2 Atomic Commit (1,132,920 ₫)
+            </button>
+          </div>
+
+          <div class="panel" style="padding:20px; gap:12px;">
+            <h3 style="font-size:16px;">Reserved Order Summary</h3>
+            <div style="border-bottom:1px solid var(--border); padding-bottom:10px; display:flex; justify-content:space-between; font-size:13px;">
+              <div>
+                <strong>1x Classic Pique Polo Black - 2XL</strong>
+                <div style="font-size:11px; color:var(--emerald);">🟢 1 unit locked in <code>inventory_reservations</code></div>
+              </div>
+              <strong>550,000 ₫</strong>
+            </div>
+            <div style="border-bottom:1px solid var(--border); padding-bottom:10px; display:flex; justify-content:space-between; font-size:13px;">
+              <div>
+                <strong>1x Puffer Jacket Mustard - M</strong> <span class="pill pill-ai">FLASH -44%</span>
+                <div style="font-size:11px; color:var(--emerald);">🟢 1 unit locked in <code>inventory_reservations</code></div>
+              </div>
+              <strong>499,000 ₫</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; color:#64748b;">
+              <span>VAT (8%)</span>
+              <span>83,920 ₫</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:800; padding-top:8px; border-top:2px solid var(--border);">
+              <span>Total Guaranteed</span>
+              <span style="color:var(--primary); font-family:var(--font-mono);">1,132,920 ₫</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================= -->
+      <!-- SCREEN 5: SCR-30 OMNICHANNEL ALLOCATION & RFC 7807                -->
+      <!-- ================================================================= -->
+      <section class="screen" id="screen-5">
+        <div class="screen-header">
+          <div>
+            <div class="screen-title">
+              SCR-30: Omnichannel Stock Allocation &amp; RFC 7807 Observability
+              <span class="pill pill-success">P1 Enterprise Core</span>
+            </div>
+            <div class="screen-subtitle">
+              Real-time channel quota partitioning (B2C Online, B2B Wholesale, Retail POS) with Safety Buffer protection and RFC 7807 error tracing.
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <span>📦 Multi-Channel Stock Allocation Matrix</span>
+            <span class="pill pill-warning">⚠️ 1 External WMS Delta Absorbed by Safety Buffer</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>SKU Code</th>
+                <th>Total Physical</th>
+                <th>Safety Buffer (10%)</th>
+                <th>B2C Web Storefront (50%)</th>
+                <th>B2B Wholesale Portal (30%)</th>
+                <th>Offline Retail POS (10%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="sku-code">SKU-POLO-BLK-XXL</span></td>
+                <td><strong>500 units</strong></td>
+                <td><span class="pill pill-success">50 units</span></td>
+                <td>
+                  250 units
+                  <div class="progress-bar-bg"><div class="progress-fill" style="width:75%; background:var(--primary);"></div></div>
+                </td>
+                <td>
+                  150 units
+                  <div class="progress-bar-bg"><div class="progress-fill" style="width:60%; background:var(--ai-accent);"></div></div>
+                </td>
+                <td>50 units</td>
+              </tr>
+              <tr>
+                <td><span class="sku-code">SKU-PNT-NVY-32</span></td>
+                <td><strong>145 units</strong> <span style="font-size:11px; color:var(--amber);">(-5 WMS Sync)</span></td>
+                <td><span class="pill pill-warning">10 / 15 Buffer Left</span></td>
+                <td>
+                  70 units
+                  <div class="progress-bar-bg"><div class="progress-fill" style="width:85%; background:var(--primary);"></div></div>
+                </td>
+                <td>
+                  45 units
+                  <div class="progress-bar-bg"><div class="progress-fill" style="width:50%; background:var(--ai-accent);"></div></div>
+                </td>
+                <td>20 units</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RFC 7807 PROBLEMDETAILS PREVIEW -->
+        <div class="panel" style="padding:16px; gap:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:13px;">🔍 Standardized RFC 7807 ProblemDetails Error Contract &amp; Distributed Traceability UI</strong>
+            <span class="pill pill-danger">HTTP 409 Conflict Preview</span>
+          </div>
+          <div class="rfc-box">
+            {<br/>
+            &nbsp;&nbsp;"type": "https://api.omnitenant.com/errors/inventory-insufficient",<br/>
+            &nbsp;&nbsp;"title": "Insufficient Channel Inventory",<br/>
+            &nbsp;&nbsp;"status": 409,<br/>
+            &nbsp;&nbsp;"detail": "SKU-POLO-BLK-XXL only has 2 units remaining in B2C channel, but 5 were requested.",<br/>
+            &nbsp;&nbsp;"instance": "/api/v1/checkout/reserve",<br/>
+            &nbsp;&nbsp;"traceId": "<strong style="color:#38bdf8;">00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01</strong>"<br/>
+            }
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    function showScreen(num) {
+      document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.proto-tab').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById('screen-' + num);
+      if (target) target.classList.add('active');
+
+      const tab = document.getElementById('tab-' + num);
+      if (tab) tab.classList.add('active');
+
+      const nav = document.getElementById('nav-' + num);
+      if (nav) nav.classList.add('active');
+
+      const titles = {
+        1: 'Tenant Backoffice / AI Autonomous Hub / <strong>SCR-65: AI Snap-to-Order Studio</strong>',
+        2: 'Tenant Backoffice / AI Autonomous Hub / <strong>SCR-66: AI Inventory Procurement Copilot</strong>',
+        3: 'Tenant Backoffice / AI Autonomous Hub / <strong>SCR-67: AI Dynamic Markdown Console</strong>',
+        4: 'Customer Storefront / High-Concurrency Checkout / <strong>SCR-103: Two-Phase 15-Min Hold</strong>',
+        5: 'Tenant Backoffice / Omnichannel WMS / <strong>SCR-30: Allocation Matrix &amp; RFC 7807</strong>'
+      };
+      document.getElementById('breadcrumb-text').innerHTML = titles[num] || titles[1];
+    }
+
+    function resolveAmbiguousRow() {
+      const row = document.getElementById('row-ambiguous');
+      const confCell = document.getElementById('row-conf-cell');
+      const hint = document.getElementById('row-hint');
+      const badge = document.getElementById('header-review-badge');
+      const bbox3 = document.getElementById('bbox-3');
+      const bbox3Tag = document.getElementById('bbox-3-tag');
+
+      row.style.background = '#ecfdf5';
+      confCell.innerHTML = '<span class="pill pill-success">🟢 100% Human Confirmed</span>';
+      hint.innerHTML = '✅ Confirmed by operator in 2.1s. Ready for 1-Click Order Creation.';
+      hint.style.color = '#059669';
+      badge.className = 'pill pill-success';
+      badge.innerHTML = '🟢 All 4 Lines Verified (100% Ready)';
+      bbox3.className = 'bbox bbox-ok';
+      bbox3Tag.innerHTML = 'BOX #3 • CONFIRMED';
+    }
+
+    function approveOrder() {
+      resolveAmbiguousRow();
+      alert('Order #B2B-9842 (22,491,000 ₫) created and inventory reserved across tenant NIKE-VN!');
+    }
+
+    function updateMarkdownSim() {
+      const discount = parseInt(document.getElementById('markdown-slider').value, 10);
+      const msrp = 890000;
+      const cogs = 350000;
+      const newPrice = Math.round(msrp * (1 - discount / 100));
+      const marginPct = ((newPrice - cogs) / newPrice) * 100;
+
+      document.getElementById('sim-discount-label').textContent = '-' + discount + '%';
+      document.getElementById('sim-price-label').textContent = newPrice.toLocaleString('en-US') + ' ₫';
+
+      const marginEl = document.getElementById('sim-margin-value');
+      const statusEl = document.getElementById('guardrail-status');
+      const btn = document.getElementById('deploy-markdown-btn');
+
+      if (marginPct < 10) {
+        marginEl.innerHTML = '🔴 ' + marginPct.toFixed(1) + '% (VIOLATION &lt;10%)';
+        marginEl.style.color = '#dc2626';
+        statusEl.style.background = '#fef2f2';
+        statusEl.style.borderColor = '#fecaca';
+        statusEl.style.color = '#dc2626';
+        statusEl.innerHTML = '🔒 ERR_MARGIN_FLOOR_VIOLATION: Gross Margin (' + marginPct.toFixed(1) + '%) breaches the hard 10.0% minimum floor. Campaign deployment blocked by Domain Engine.';
+        btn.disabled = true;
+        btn.style.opacity = '0.45';
+        btn.textContent = '🔒 Blocked by 10% Gross Margin Floor Guardrail';
+      } else {
+        marginEl.innerHTML = '🟢 +' + marginPct.toFixed(1) + '% (+' + (newPrice - cogs).toLocaleString('en-US') + ' ₫)';
+        marginEl.style.color = '#059669';
+        statusEl.style.background = '#ecfdf5';
+        statusEl.style.borderColor = '#a7f3d0';
+        statusEl.style.color = '#059669';
+        statusEl.innerHTML = '✅ GUARDRAIL PASSED: Gross Margin (' + marginPct.toFixed(1) + '%) is safely above the 10.0% minimum floor. Auto-rollback scheduled in 72h.';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.textContent = '🚀 1-Click Launch 72h Flash Sale Campaign (Auto-Rollback Enabled)';
+      }
+    }
+
+    // Support URL param ?screen=1..5 for automated screenshots
+    const params = new URLSearchParams(window.location.search);
+    const s = parseInt(params.get('screen'), 10);
+    if (s >= 1 && s <= 5) {
+      showScreen(s);
+    }
+  </script>
+</body>
+</html>
