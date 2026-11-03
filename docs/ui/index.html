@@ -752,8 +752,7 @@
             </div>
           </div>
           <div style="display:flex; gap:10px;">
-            <button class="btn btn-outline">📂 Upload Invoice / Chat Slip</button>
-            <button class="btn btn-ai" onclick="approveOrder()">⚡ 1-Click Approve B2B Order (22,491,000 ₫)</button>
+            <button class="btn btn-outline">+ Upload New Slip (Img / PDF)</button>
           </div>
         </div>
 
@@ -849,9 +848,10 @@
                       <option value="1">⚡ [1] SKU-PNT-NVY-32 — Tailored Navy Trousers 32 (74%)</option>
                       <option value="2">[2] SKU-PNT-BLK-32 — Tailored Jet Black Trousers 32 (64%)</option>
                       <option value="3">[3] SKU-PNT-CHA-32 — Charcoal Slim Trousers 32 (48%)</option>
+                      <option value="0">🔍 [0] None of above? Search all 1,420 SKUs manually...</option>
                     </select>
                     <div style="font-size:11px; color:#b45309; margin-top:4px;" id="row-hint">
-                      ⚠️ Below 80% threshold: Select Top-3 candidate or press [1-3] key to confirm.
+                      ⚠️ Below 80% threshold: Pick [1-3], press [0] for full catalog search, or [Del] to drop line.
                     </div>
                   </td>
                   <td id="row-conf-cell"><span class="pill pill-warning">🟡 74% Review</span></td>
