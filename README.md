@@ -177,6 +177,8 @@ flowchart TD
 
 Detailed screen IDs, task flows, permissions, UI/UX state contracts, and API mappings are maintained in [Information Architecture & Screen Hierarchy](docs/04-information-architecture.md).
 
+Complete wireframe blueprints, design system tokens, split-screen layouts, and interaction flows are documented in [UI/UX Design Specification & Wireframe Blueprints](docs/09-ui-ux-design-specification.md).
+
 ## 3. C4 Architecture
 
 This section documents the C1–C3 architecture views of the OmniTenant platform.

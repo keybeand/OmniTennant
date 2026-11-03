@@ -52,6 +52,20 @@ OmniTenant Platform
 │   │   ├── B2B Credit Limit Approval Modal (over-limit authorization)
 │   │   └── Tax Invoice Generator & PDF Export Action
 │   │
+│   ├── AI Autonomous Operations Hub (/admin/ai)
+│   │   ├── Snap-to-Order Studio (/admin/ai/snap-to-order)
+│   │   │   ├── Split-screen OCR document inspector
+│   │   │   ├── Line-item confidence pill badges & Top-3 SKU candidate selector
+│   │   │   └── 1-Click B2B Draft Order generator
+│   │   ├── Inventory Procurement Copilot (/admin/ai/procurement)
+│   │   │   ├── 30-day velocity burn-rate & Runway Days forecast cards
+│   │   │   ├── Stockout horizon alert threshold indicators
+│   │   │   └── Auto-drafted Supplier Purchase Order (PO) drawer
+│   │   └── Dynamic Markdown & Liquidation Console (/admin/ai/markdowns)
+│   │       ├── Stagnant SKU age scanner (>30 days, 50% velocity drop)
+│   │       ├── Price elasticity simulator with Gross Margin Floor >= 10% lock
+│   │       └── 1-Click Flash Sale / Clearance deployment modal
+│   │
 │   ├── Storefront & Webhook Configuration (/admin/settings)
 │   │   ├── Branding & Custom Domain CNAME binding
 │   │   ├── Webhook Endpoints Manager (URL registration, HMAC secret rotation)
@@ -112,6 +126,7 @@ Navigation menus, action buttons, and URLs are strictly enforced against user id
 | **Inventory Allocation & Reconciliation** | | ✓ | ✓ | | |
 | **Pricing & B2B Tiers** | | ✓ | | | |
 | **Order Fulfillment** | View all | ✓ | ✓ | | |
+| **AI Operations (Snap-to-Order, Copilot, Markdowns)** | | ✓ | View/Approve only | | |
 | **Storefront Settings & Webhooks** | | ✓ | | | |
 | **Staff & RBAC Management** | | ✓ | | | |
 | **Audit Logs** | Global audit | Tenant audit | | | |
@@ -144,6 +159,9 @@ Navigation menus, action buttons, and URLs are strictly enforced against user id
 | `SCR-50` | Order Fulfillment Grid | Full page | US14, US10 | Target V1 Specification |
 | `SCR-51` | Order Detail & Timeline | Drawer on Orders | US14, US16 | Target V1 Specification |
 | `SCR-52` | B2B Credit Limit Over-Limit Approval | Modal on Orders | US10 | Target V1 Specification |
+| `SCR-65` | AI Snap-to-Order Studio | Split-screen page | US19 | Target V1 Specification |
+| `SCR-66` | AI Procurement Copilot & Runway Hub | Full page with Drawer | US20 | Target V1 Specification |
+| `SCR-67` | AI Dynamic Markdown & Liquidation Console | Full page with Modal | US21 | Target V1 Specification |
 | `SCR-60` | Storefront Branding & Settings | Full page | US18 | Target V1 Specification |
 | `SCR-61` | Webhook Endpoint Manager | Tab on Settings | US15, US18 | Target V1 Specification |
 | `SCR-70` | Staff & RBAC Directory | Full page | US17 | Target V1 Specification |
@@ -180,6 +198,9 @@ Navigation menus, action buttons, and URLs are strictly enforced against user id
 | **US16** | `SCR-80` Audit Log Viewer | Filter immutable event stream by actor, tenant, action, and correlation ID. |
 | **US17** | `SCR-70`, `SCR-71` Staff Directory | Invite staff members; assign `TENANT_OWNER` or `WAREHOUSE_OPERATOR` role. |
 | **US18** | `SCR-60`, `SCR-61` Storefront Settings | Configure brand assets, custom domain CNAME, and outbound webhook endpoints. |
+| **US19** | `SCR-65` AI Snap-to-Order Studio | Ingest handwritten/PDF/chat order $\rightarrow$ Multimodal Vision & Trigram matching $\rightarrow$ Split-screen review with $\ge 80\%$ confidence pills $\rightarrow$ 1-Click Draft Order. |
+| **US20** | `SCR-66` AI Procurement Copilot | Monitor 30-day SKU velocity $\rightarrow$ Forecast Runway Days ($\frac{\text{Stock}}{\text{BurnRate}}$) $\rightarrow$ Alert stockout horizon $\rightarrow$ Auto-generate supplier PO drawer. |
+| **US21** | `SCR-67` AI Dynamic Markdown Console | Scan stagnant inventory (>30d, 50% velocity drop) $\rightarrow$ Simulate elasticity markdown enforcing Gross Margin $\ge 10\%$ $\rightarrow$ 1-Click Flash Sale with auto-rollback. |
 
 ---
 
@@ -237,6 +258,17 @@ flowchart TB
     BackofficeShell --> Users
     Users --> UserInvite
     BackofficeShell --> Audit
+
+    %% AI Autonomous Hub
+    AIHub["AI Autonomous Hub (/admin/ai)"]
+    SnapOrder["SCR-65 Snap-to-Order Studio"]
+    ProcureCopilot["SCR-66 Procurement Copilot"]
+    MarkdownConsole["SCR-67 Dynamic Markdowns"]
+
+    BackofficeShell --> AIHub
+    AIHub --> SnapOrder
+    AIHub --> ProcureCopilot
+    AIHub --> MarkdownConsole
 
     %% Storefront
     StorefrontShell["Storefront Shell (/{tenant-slug})"]
@@ -391,6 +423,9 @@ Every screen and component in OmniTenant conforms strictly to the following 9-st
 | `SCR-50` | Orders Grid | `GET /api/v1/orders`, `PUT /api/v1/orders/{id}/status` |
 | `SCR-51` | Order Detail Drawer | `GET /api/v1/orders/{id}`, `GET /api/v1/orders/{id}/invoice.pdf` |
 | `SCR-52` | Credit Limit Modal | `POST /api/v1/b2b/buyers/{id}/credit-approval` |
+| `SCR-65` | AI Snap-to-Order Studio | `POST /api/v1/ai/parse-po`, `GET /api/v1/ai/po-jobs/{jobId}`, `POST /api/v1/ai/po-jobs/{jobId}/confirm` |
+| `SCR-66` | AI Procurement Copilot | `GET /api/v1/ai/forecasts/runway`, `POST /api/v1/ai/forecasts/generate-po` |
+| `SCR-67` | AI Dynamic Markdown Console | `GET /api/v1/ai/markdowns/proposals`, `POST /api/v1/ai/markdowns/{proposalId}/activate` |
 | `SCR-60` | Settings & Branding | `GET /api/v1/tenants/settings`, `PUT /api/v1/tenants/settings` |
 | `SCR-61` | Webhook Manager | `GET /api/v1/webhooks`, `POST /api/v1/webhooks`, `POST /api/v1/webhooks/{id}/test` |
 | `SCR-70` | Staff Directory | `GET /api/v1/users`, `PUT /api/v1/users/{id}/status` |
