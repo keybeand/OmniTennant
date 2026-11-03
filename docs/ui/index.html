@@ -653,33 +653,34 @@
   <!-- TOP PROTOTYPE SWITCHER -->
   <div class="proto-bar">
     <div class="proto-brand">
-      <span>⚡ OmniTenant Interactive UI/UX Prototype</span>
-      <span class="proto-badge">V1 Architecture Blueprint</span>
+      <span>⚡ OmniTenant Demo Switcher</span>
+      <span class="proto-badge">2 Isolated Web Apps</span>
     </div>
-    <div class="proto-tabs">
-      <button class="proto-tab active" onclick="showScreen(1)" id="tab-1">1. SCR-65: AI Snap-to-Order (Agent 1)</button>
-      <button class="proto-tab" onclick="showScreen(2)" id="tab-2">2. SCR-66: Procurement Copilot (Agent 2)</button>
-      <button class="proto-tab" onclick="showScreen(3)" id="tab-3">3. SCR-67: Dynamic Markdown (Agent 3)</button>
-      <button class="proto-tab" onclick="showScreen(4)" id="tab-4">4. SCR-103: 15-Min Hold Checkout</button>
-      <button class="proto-tab" onclick="showScreen(5)" id="tab-5">5. SCR-30: Omnichannel Allocation & RFC 7807</button>
+    <div class="proto-tabs" style="align-items:center;">
+      <span style="font-size:11px; color:#94a3b8; font-weight:700; margin-right:2px;">[APP 1: ADMIN BACKOFFICE]</span>
+      <button class="proto-tab active" onclick="showScreen(1)" id="tab-1">SCR-65: Snap-to-Order (Ag.1)</button>
+      <button class="proto-tab" onclick="showScreen(2)" id="tab-2">SCR-66: Runway Copilot (Ag.2)</button>
+      <button class="proto-tab" onclick="showScreen(3)" id="tab-3">SCR-67: Markdown (Ag.3)</button>
+      <button class="proto-tab" onclick="showScreen(5)" id="tab-5">SCR-30: WMS &amp; RFC 7807</button>
+      <span style="font-size:11px; color:#38bdf8; font-weight:700; margin-left:8px; margin-right:2px;">[APP 2: STOREFRONT WEB]</span>
+      <button class="proto-tab" onclick="showScreen(4)" id="tab-4">🛒 SCR-103: Customer Checkout (15m Hold)</button>
     </div>
   </div>
 
   <!-- MAIN APPLICATION SHELL -->
   <div class="app-layout">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <!-- ADMIN SIDEBAR (HIDDEN WHEN VIEWING CUSTOMER STOREFRONT APP) -->
+    <aside class="sidebar" id="admin-sidebar">
       <div class="sidebar-header">
         <div class="sidebar-logo">
           <span class="logo-dot"></span>
-          OmniTenant OS
+          OmniTenant Admin
         </div>
         <span class="tenant-pill">NIKE-VN</span>
       </div>
 
-      <div class="nav-section">Core Operations</div>
-      <div class="nav-item" onclick="showScreen(5)">📦 Omnichannel WMS</div>
-      <div class="nav-item" onclick="showScreen(4)">🛒 Storefront Checkout</div>
+      <div class="nav-section">Enterprise Core (P1)</div>
+      <div class="nav-item" id="nav-5" onclick="showScreen(5)">📦 Omnichannel WMS</div>
 
       <div class="nav-section">Tri-Agent AI Engine (P0)</div>
       <div class="nav-item active" id="nav-1" onclick="showScreen(1)">
@@ -702,7 +703,8 @@
 
     <!-- CONTENT AREA -->
     <div class="main-area">
-      <header class="topbar">
+      <!-- ADMIN TOPBAR -->
+      <header class="topbar" id="admin-topbar">
         <div class="breadcrumb" id="breadcrumb-text">
           Tenant Backoffice &nbsp;/&nbsp; AI Autonomous Hub &nbsp;/&nbsp; <strong>SCR-65: AI Snap-to-Order Studio</strong>
         </div>
@@ -711,7 +713,26 @@
             <span class="status-dot"></span>
             <span>RLS Context: app.current_tenant_id = '9b1deb4d-3b7d'</span>
           </div>
-          <span class="pill pill-ai">⚡ Tri-Agent Engine Active</span>
+          <span class="pill pill-ai">⚡ Role: Tenant Owner / Operator</span>
+        </div>
+      </header>
+
+      <!-- CUSTOMER STOREFRONT TOP NAVBAR (ONLY VISIBLE ON APP 2 / SCR-103) -->
+      <header class="topbar" id="storefront-topbar" style="display:none; height:64px; background:#ffffff; border-bottom:2px solid #e2e8f0;">
+        <div style="display:flex; align-items:center; gap:24px;">
+          <div style="background:#0f172a; color:#fff; font-weight:800; font-size:15px; padding:7px 14px; border-radius:6px; letter-spacing:0.03em;">
+            NIKE VIETNAM STORE
+          </div>
+          <nav style="display:flex; gap:18px; font-size:13px; font-weight:600; color:#334155;">
+            <span>Catalog Browse (SCR-100)</span>
+            <span>B2B Bulk Order CSV (SCR-104)</span>
+            <span style="color:#7c3aed;">⚡ Flash Sale Deals (-44%)</span>
+            <span>Order Tracking (SCR-105)</span>
+          </nav>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="pill pill-ai">🌐 Separate Storefront App (shop.nike.vn)</span>
+          <span class="pill pill-success">🛒 Cart (2 Locked) • Buyer: Minh N.</span>
         </div>
       </header>
 
@@ -1261,6 +1282,21 @@
       const nav = document.getElementById('nav-' + num);
       if (nav) nav.classList.add('active');
 
+      // Toggle between App 1 (Admin Backoffice Shell) and App 2 (Customer Storefront Shell)
+      const adminSidebar = document.getElementById('admin-sidebar');
+      const adminTopbar = document.getElementById('admin-topbar');
+      const storeTopbar = document.getElementById('storefront-topbar');
+
+      if (num === 4) {
+        adminSidebar.style.display = 'none';
+        adminTopbar.style.display = 'none';
+        storeTopbar.style.display = 'flex';
+      } else {
+        adminSidebar.style.display = 'flex';
+        adminTopbar.style.display = 'flex';
+        storeTopbar.style.display = 'none';
+      }
+
       const titles = {
         1: 'Tenant Backoffice / AI Autonomous Hub / <strong>SCR-65: AI Snap-to-Order Studio</strong>',
         2: 'Tenant Backoffice / AI Autonomous Hub / <strong>SCR-66: AI Inventory Procurement Copilot</strong>',
@@ -1340,3 +1376,4 @@
   </script>
 </body>
 </html>
+
